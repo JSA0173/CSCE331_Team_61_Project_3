@@ -2,7 +2,7 @@
 function PortalPage( {setView}) {
   return (
     <div class = 'text'>
-      <h1>Home</h1>
+      <h1>Boba Shop Home</h1>
       <h2>Select the desired portal using the buttons below:</h2>
       <div class = 'buttons'>
         <button class = 'button' id = 'managerbtn' onClick={() => setView('manager')}> Manager Portal</button>
