@@ -51,8 +51,8 @@ const MenuView = () => {
       <main className="menu-grid">
         {menuItems.map((item, index) => (
           <div key={index} className="menu-item">
-            <span className="item-text">{item.name}</span>
-            <span className="item-text">${item.price.toFixed(2)}</span>
+            <span className="menu-item-text">{item.name}</span>
+            <span className="menu-item-text">${item.price.toFixed(2)}</span>
           </div>
         ))}
       </main>
