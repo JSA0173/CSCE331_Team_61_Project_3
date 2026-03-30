@@ -1,0 +1,79 @@
+/* Container and Layout */
+.kiosk-container {
+  background-color: #1a1f2e;
+  color: #ffffff;
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1{
+    font-family: "Segoe UI", sans-serif;
+    text-align: center;
+    color: #fff;
+    font-size: 50px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); /* 10 columns as seen in screenshot */
+  gap: 10px;
+}
+
+.menu-button {
+  background-color: #252b3d;
+  border: 1px solid #30384d;
+  border-radius: 8px;
+  padding: 12px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: #2d354a;
+}
+
+.item-text {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #ffffff;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.footer-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.submit-btn {
+  background-color: #6b2c32;
+  color: white;
+  border: 1px solid #4a1f23;
+  border-radius: 6px;
+  padding: 10px 45px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.1s active;
+}
+
+.submit-btn:hover {
+  background-color: #83363d;
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
