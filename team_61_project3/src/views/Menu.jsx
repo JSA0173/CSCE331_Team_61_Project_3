@@ -1,5 +1,5 @@
-import React from 'react';
 import './Menu.css';
+import bobaImg from '../assets/boba.png'
 
 const MenuView = () => {
   const menuItems = [
@@ -34,26 +34,30 @@ const MenuView = () => {
   ];
 
   return (
-  <div className="menu-container">
-    <header className="menu-header">
-        <img 
-            src="src\assets\boba.png"
+    <div className="menu-container">
+      <header className="menu-header">
+
+        <div className="header-title-group">
+          <img 
+            src={bobaImg}
             alt="Delicious Boba Tea" 
             className="corner-image" 
-        />
-        <h1>Menu</h1>
-    </header>
+          />
+          <h1>Menu</h1>
+        </div>
 
-  <main className="menu-grid">
-    {menuItems.map((item, index) => (
-      <button key={index} className="menu-button">
-        <span className="item-text">{item.name}</span>
-        <span className="item-text">${item.price.toFixed(2)}</span>
-      </button>
-    ))}
-  </main>
-  
-</div>
+      </header>
+
+      <main className="menu-grid">
+        {menuItems.map((item, index) => (
+          <div key={index} className="menu-item">
+            <span className="item-text">{item.name}</span>
+            <span className="item-text">${item.price.toFixed(2)}</span>
+          </div>
+        ))}
+      </main>
+      
+    </div>
   );
 };
 
