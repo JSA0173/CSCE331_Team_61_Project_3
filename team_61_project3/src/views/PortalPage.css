@@ -24,7 +24,6 @@ body{
     margin-right: auto;
     height: 50px;
     width: 400px;
-    
 }
 .button:hover {
     background-color: rgba(229, 57, 53, .7);

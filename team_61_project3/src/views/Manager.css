@@ -1,0 +1,104 @@
+.toprow{
+    display:flex;
+    justify-content: center;
+}
+.bottomrow{
+    display:flex;
+    justify-content: center;
+}
+#employeebtn{
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-left: auto;
+    margin-right: -200px;
+    height: 100px;
+    width: 300px;
+}
+#employeebtn:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
+}
+
+#employeebtn:pressed {
+    background-color: rgba(183, 28, 28, .8);
+    border-color: #b71c1c;
+}
+#reportbtn{
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 100px;
+    width: 300px;
+}
+#reportbtn:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
+}
+
+#reportbtn:pressed {
+    background-color: rgba(183, 28, 28, .8);
+    border-color: #b71c1c;
+}
+#pricebtn{
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 100px;
+    width: 300px;
+}
+#pricebtn:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
+}
+
+#pricebtn:pressed {
+    background-color: rgba(183, 28, 28, .8);
+    border-color: #b71c1c;
+}
+#inventorybtn{
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-left: auto;
+    margin-right: -200px;
+    height: 100px;
+    width: 300px;
+}
+#inventorybtn:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
+}
+
+#inventorybtn:pressed {
+    background-color: rgba(183, 28, 28, .8);
+    border-color: #b71c1c;
+}
