@@ -35,15 +35,14 @@ const MenuView = () => {
 
   return (
   <div className="menu-container">
-  
-  {/* Here is your standalone image! */}
-  <img 
-    src="src\assets\boba.jpg" 
-    alt="Delicious Boba Tea" 
-    className="standalone-image" 
-  />
-
-  <h1>Menu</h1>
+    <header className="menu-header">
+        <img 
+            src="src\assets\boba.png"
+            alt="Delicious Boba Tea" 
+            className="corner-image" 
+        />
+        <h1>Menu</h1>
+    </header>
 
   <main className="menu-grid">
     {menuItems.map((item, index) => (

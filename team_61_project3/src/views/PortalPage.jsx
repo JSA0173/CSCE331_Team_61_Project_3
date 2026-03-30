@@ -1,3 +1,4 @@
+import './PortalPage.css';
 
 function PortalPage( {setView}) {
   return (
