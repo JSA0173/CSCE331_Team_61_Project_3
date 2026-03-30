@@ -1,15 +1,15 @@
 import './Manager.css'
-function ManagerPortal(){
+function ManagerPortal({setView}){
     return(
         <>
             <h1>Manager Portal</h1>
             <div class = 'toprow'>
-                <button class = 'button' id = 'employeebtn'>Employees</button>
-                <button id = 'reportbtn'>Reports</button>
+                <button id = 'employeebtn' onClick={() => setView('employee')}>Employees</button>
+                <button id = 'reportbtn' onClick={() => setView('report')}>Reports</button>
             </div>
             <div class = 'bottomrow'>
-                <button id = 'inventorybtn'>Inventory</button>
-                <button id = 'pricebtn'>Prices</button>
+                <button id = 'inventorybtn' onClick={() => setView('inventory')}>Inventory</button>
+                <button id = 'pricebtn' onClick={() => setView('price')}>Prices</button>
             </div>
         </>
     )

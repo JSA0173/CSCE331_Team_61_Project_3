@@ -8,6 +8,11 @@ import Kiosk from './views/Kiosk'
 import Menu from './views/Menu'
 import CashierPortal from './views/CashierPortal'
 import ManagerPortal from './views/ManagerPortal'
+
+import Employee from './views/Employee'
+import Price from './views/Price'
+import Report from './views/Reports'
+import Inventory from './views/Inventory'
 /*imports for each view */
 
 
@@ -22,6 +27,10 @@ function App() {
       {view === 'manager' && <ManagerPortal setView = {setView}/>}
       {view === 'cashier' && <CashierPortal setView = {setView}/>}
       {view === 'menu' && <Menu setView = {setView}/>}
+      {view === 'employee' && <Employee setView = {setView} />}
+      {view === 'price' && <Price setView = {setView} />}
+      {view === 'report' && <Report setView = {setView} />}
+      {view === 'inventory' && <Inventory setView = {setView} />}
     </div>
   )
 }
