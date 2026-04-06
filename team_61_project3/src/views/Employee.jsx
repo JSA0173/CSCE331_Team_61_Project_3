@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import './Employee.css'
 function Employee({ setView }) {
     const [employees, setEmployees] = useState([]);
 
@@ -13,14 +13,14 @@ function Employee({ setView }) {
     return (
         <>
             <h1>Employees</h1>
-            <table>
+            <table class = 'data-table'>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Salary</th>
-                        <th>Job Title</th>
-                        <th>Date Hired</th>
+                        <th class = 'tableheader'>ID</th>
+                        <th class = 'tableheader'>Name</th>
+                        <th class = 'tableheader'>Salary</th>
+                        <th class = 'tableheader'>Job Title</th>
+                        <th class = 'tableheader'>Date Hired</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,7 +35,7 @@ function Employee({ setView }) {
                     ))}
                 </tbody>
             </table>
-            <button onClick={() => setView('manager')}>Return to Manager Portal Home</button>
+            <button class = "employeebutton" onClick={() => setView('manager')}>Return to Manager Portal Home</button>
         </>
     );
 }
