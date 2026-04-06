@@ -6,7 +6,7 @@ const pool = require('./db');
 const app = express();
 app.use(cors());
 app.use(express.json());
-//app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 //Route modules 
 app.use('/api',           require('./routes/auth'));
@@ -32,9 +32,9 @@ async function resetSequences() {
     console.warn('Sequence reset warning:', err.message);
   }
 }
-//app.get('/{0,}', (req, res) => {
-  //res.sendFile(path.join(__dirname, 'public', 'index.html'));
-//});
+app.get('/{0,}', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
   console.log(`Boba POS running on http://localhost:${PORT}`);
