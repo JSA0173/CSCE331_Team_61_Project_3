@@ -1,6 +1,6 @@
 function Report( {setView}){
     return (<>
-        <h1>Report</h1>
+        <h1>Reports</h1>
         <button class = 'button' id = 'managerbtn' onClick={() => setView('manager')}> Return to Manager Portal Home</button>
     </>)
 }

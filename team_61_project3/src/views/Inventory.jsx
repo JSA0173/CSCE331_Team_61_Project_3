@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import './Inventory.css'
 
 function Inventory({ setView }) {
     const [inventory, setInventory] = useState([]);
@@ -16,30 +17,32 @@ function Inventory({ setView }) {
             <table className='data-table'>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Quantity</th>
-                        <th>Price/Unit</th>
-                        <th>Reorder At</th>
-                        <th>Type</th>
+                        <th className='tableheader'>ID</th>
+                        <th className='tableheader'>Name</th>
+                        <th className='tableheader'>Quantity</th>
+                        <th className='tableheader'>Price/Unit</th>
+                        <th className='tableheader'>Reorder At</th>
+                        <th className='tableheader'>Type</th>
                     </tr>
                 </thead>
                 <tbody>
                     {inventory.map(item => (
                         <tr key={item.inventoryId}>
-                            <td>{item.inventoryId}</td>
-                            <td>{item.name}</td>
-                            <td>{item.quantityOnHand}</td>
-                            <td>${parseFloat(item.pricePerUnit).toFixed(2)}</td>
-                            <td>{item.reorderThreshold}</td>
-                            <td>{item.type}</td>
+                            <td className='odd'>{item.inventoryId}</td>
+                            <td className='even'>{item.name}</td>
+                            <td className='odd'>{item.quantityOnHand}</td>
+                            <td className='even'>${parseFloat(item.pricePerUnit).toFixed(2)}</td>
+                            <td className='odd'>{item.reorderThreshold}</td>
+                            <td className='even'>{item.type}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <button className='button' id='managerbtn' onClick={() => setView('manager')}>
+            <button className='employeebutton' id='managerbtn' onClick={() => setView('manager')}>
                 Return to Manager Portal Home
             </button>
+            <button className='employeebutton'> Add Item</button>
+            <button className='employeebutton'> Update Item</button>
         </>
     );
 }
