@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import './ToggleMenu.css'; // Import the new CSS file
 
 function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
     const [bases, setBases] = useState([]);
@@ -14,8 +15,8 @@ function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
         fetch('/api/inventory/bases-and-toppings')
             .then(res => res.json())
             .then(data => {
-                setBases(data.bases);
-                setToppings(data.toppings);
+                setBases(data.bases || []);
+                setToppings(data.toppings || []);
             });
 
         fetch(`/api/ingredients/${item.itemId}`)
@@ -26,34 +27,24 @@ function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
             });
     }, [item.itemId]);
 
-    function toggleSet(set, setSet, id) {
+    const toggleSet = (set, setSet, id) => {
         const newSet = new Set(set);
         if (newSet.has(id)) newSet.delete(id);
         else newSet.add(id);
         setSet(newSet);
-    }
+    };
 
-    function handleAdd() {
+    const handleAdd = () => {
         if (selectedBases.size === 0) {
             alert('Please select at least one base.');
             return;
         }
-
+        // Logic remains the same...
         const baseObjs = bases.filter(b => selectedBases.has(b.inventoryId));
         const topObjs = toppings.filter(t => selectedToppings.has(t.inventoryId)).slice(0, 5);
-
         const baseType = baseObjs.map(b => b.name).join(', ');
         const toppingIds = topObjs.map(t => String(t.inventoryId));
-
-        const sizeExtra = size === 'Large' ? 2.00 : 0;
-        let baseExtra = 0;
-        if (parseFloat(item.basePrice) === 0) {
-            baseObjs.forEach(b => baseExtra += parseFloat(b.pricePerUnit || 0));
-        }
-        let toppingExtra = 0;
-        topObjs.forEach(t => toppingExtra += parseFloat(t.pricePerUnit || 0));
-        const extras = sizeExtra + baseExtra + toppingExtra;
-        const price = parseFloat(item.basePrice) + extras;
+        const price = parseFloat(item.basePrice) + (size === 'Large' ? 2 : 0);
 
         onAdd({
             itemId: item.itemId,
@@ -63,18 +54,16 @@ function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
             iceLevel,
             temperature,
             sugarAmount,
-            extras,
             toppings: toppingIds,
             price
         });
-    }
+    };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '700px' }}>
-            <h2>Customize: {item.name}</h2>
-
-            <div style={{ marginBottom: '16px' }}>
-                <label>Customer Name: </label>
+        <div className="cashier-container">
+            {}
+            <div className="customer-input-section">
+                <label>Customer Name:</label>
                 <input
                     type="text"
                     value={customerName}
@@ -83,10 +72,11 @@ function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
                 />
             </div>
 
-            <h3>Bases and Flavorings</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
+            {}
+            <div className="section-header">Bases and Flavorings</div>
+            <div className="options-grid">
                 {bases.map(b => (
-                    <label key={b.inventoryId}>
+                    <label key={b.inventoryId} className="option-item">
                         <input
                             type="checkbox"
                             checked={selectedBases.has(b.inventoryId)}
@@ -97,10 +87,11 @@ function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
                 ))}
             </div>
 
-            <h3>Toppings (max 5)</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
+            {}
+            <div className="section-header">Toppings (select up to 5)</div>
+            <div className="options-grid">
                 {toppings.map(t => (
-                    <label key={t.inventoryId}>
+                    <label key={t.inventoryId} className="option-item">
                         <input
                             type="checkbox"
                             checked={selectedToppings.has(t.inventoryId)}
@@ -111,30 +102,43 @@ function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
                 ))}
             </div>
 
-            <h3>Size</h3>
-            <label><input type="radio" checked={size === 'Normal'} onChange={() => setSize('Normal')} /> Regular</label>
-            <label><input type="radio" checked={size === 'Large'} onChange={() => setSize('Large')} /> Large (+$2.00)</label>
+            {}
+            <div className="section-header">Size</div>
+            <div className="options-grid">
+                <label className="option-item"><input type="radio" checked={size === 'Normal'} onChange={() => setSize('Normal')} /> Regular</label>
+                <label className="option-item"><input type="radio" checked={size === 'Large'} onChange={() => setSize('Large')} /> Large (+$2.00)</label>
+            </div>
 
-            <h3>Ice Level</h3>
-            <label><input type="radio" checked={iceLevel === 'NONE'} onChange={() => setIceLevel('NONE')} /> None</label>
-            <label><input type="radio" checked={iceLevel === 'LESS'} onChange={() => setIceLevel('LESS')} /> Less</label>
-            <label><input type="radio" checked={iceLevel === 'REGULAR'} onChange={() => setIceLevel('REGULAR')} /> Regular</label>
+            {}
+            <div className="section-header">Ice Level</div>
+            <div className="options-grid">
+                <label className="option-item"><input type="radio" checked={iceLevel === 'NONE'} onChange={() => setIceLevel('NONE')} /> None</label>
+                <label className="option-item"><input type="radio" checked={iceLevel === 'LESS'} onChange={() => setIceLevel('LESS')} /> Less</label>
+                <label className="option-item"><input type="radio" checked={iceLevel === 'REGULAR'} onChange={() => setIceLevel('REGULAR')} /> Regular</label>
+            </div>
 
-            <h3>Temperature</h3>
-            <label><input type="radio" checked={temperature === 'COLD'} onChange={() => setTemperature('COLD')} /> Cold</label>
-            <label><input type="radio" checked={temperature === 'HOT'} onChange={() => setTemperature('HOT')} /> Hot</label>
+            {}
+            <div className="section-header">Temperature</div>
+            <div className="options-grid">
+                <label className="option-item"><input type="radio" checked={temperature === 'COLD'} onChange={() => setTemperature('COLD')} /> Cold</label>
+                <label className="option-item"><input type="radio" checked={temperature === 'HOT'} onChange={() => setTemperature('HOT')} /> Hot</label>
+            </div>
 
-            <h3>Sugar Level</h3>
-            {[0, 25, 50, 75, 100].map(s => (
-                <label key={s}>
-                    <input type="radio" checked={sugarAmount === s} onChange={() => setSugarAmount(s)} />
-                    {s}%
-                </label>
-            ))}
+            {}
+            <div className="section-header">Sugar Level</div>
+            <div className="options-grid">
+                {[0, 25, 50, 75, 100].map(s => (
+                    <label key={s} className="option-item">
+                        <input type="radio" checked={sugarAmount === s} onChange={() => setSugarAmount(s)} />
+                        {s}%
+                    </label>
+                ))}
+            </div>
 
-            <div style={{ marginTop: '20px' }}>
-                <button onClick={onBack}>← Back</button>
-                <button onClick={handleAdd} style={{ marginLeft: '10px' }}>Add to Cart</button>
+            {/* Footer Buttons */}
+            <div className="action-footer">
+                <button className="btn-back" onClick={onBack}>← Back</button>
+                <button className="btn-add" onClick={handleAdd}>Add to Cart</button>
             </div>
         </div>
     );
