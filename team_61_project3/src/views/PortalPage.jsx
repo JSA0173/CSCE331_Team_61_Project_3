@@ -1,4 +1,5 @@
 import './PortalPage.css';
+import GoogleTranslate from  './GoogleTranslate.jsx'
 
 function PortalPage( {setView}) {
   return (
@@ -11,6 +12,7 @@ function PortalPage( {setView}) {
         <button class = 'button' id = 'menubtn' onClick={() => setView('menu')}> Display Menu</button>
         <button class = 'button'id = 'kioskbtn' onClick={() => setView('kiosk')}> Customer Kiosk Portal</button>
       </div>
+      
     </div>
   );
 }

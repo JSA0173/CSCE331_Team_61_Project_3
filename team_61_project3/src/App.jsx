@@ -13,6 +13,7 @@ import Employee from './views/Employee'
 import Price from './views/Price'
 import Report from './views/Reports'
 import Inventory from './views/Inventory'
+import GoogleTranslate from './views/GoogleTranslate'
 /*imports for each view */
 
 
@@ -31,6 +32,7 @@ function App() {
       {view === 'price' && <Price setView = {setView} />}
       {view === 'report' && <Report setView = {setView} />}
       {view === 'inventory' && <Inventory setView = {setView} />}
+      <GoogleTranslate/>
     </div>
   )
 }
