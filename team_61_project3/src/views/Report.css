@@ -103,8 +103,14 @@ input::placeholder {
 /* Return Home Button at Bottom */
 #managerbtn {
     margin-top: 30px;
-    background-color: #1a2238;
+    background-color: rgba(255, 255, 255, .08);
     border: 1px solid #ffffff4d;
     font-size: 1rem;
     padding: 10px 25px;
+}
+
+/* Return Home Button at Bottom */
+#managerbtn:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
 }
