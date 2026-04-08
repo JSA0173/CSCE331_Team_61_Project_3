@@ -63,9 +63,6 @@ function CashierPortal({ setView }) {
     return (
         <div className="cashier-portal">
             <h1>Cashier Portal</h1>
-            <button className="button" onClick={() => setView('manager')}>
-                Return to Manager Portal
-            </button>
 
             <div className="portal-layout">
                 <div className="menu-section">
