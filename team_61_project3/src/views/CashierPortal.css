@@ -1,0 +1,145 @@
+.cashier-portal {
+    padding: 20px;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.cashier-portal h1 {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.cashier-portal .portal-layout {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    align-items: flex-start;
+}
+
+.cashier-portal .menu-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.cashier-portal .menu-section h2 {
+    color: #ffffff;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.cashier-portal .menu-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.cashier-portal .menu-item-button {
+    width: 150px;
+    height: 80px;
+    padding: 8px;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.cashier-portal .menu-item-button:hover {
+    background-color: rgba(229, 57, 53, 0.7);
+    border-color: #e53935;
+}
+
+.cashier-portal .menu-item-button:active {
+    background-color: rgba(183, 28, 28, 0.8);
+    border-color: #b71c1c;
+}
+
+.cashier-portal .cart-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 16px;
+    height: fit-content;
+}
+
+.cashier-portal .cart-panel h2 {
+    color: #ffffff;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+.cashier-portal .cart-panel p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+}
+
+.cashier-portal .cart-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 0;
+    color: #ffffff;
+    font-size: 12px;
+}
+
+.cashier-portal .cart-item-details {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 2px;
+}
+
+.cashier-portal .cart-total {
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.cashier-portal .button {
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 20px;
+    height: 50px;
+    width: 250px;
+}
+
+.cashier-portal .button:hover {
+    background-color: rgba(229, 57, 53, 0.7);
+    border-color: #e53935;
+}
+
+.cashier-portal .button:active {
+    background-color: rgba(183, 28, 28, 0.8);
+    border-color: #b71c1c;
+}
+
+.cashier-portal .submit-button {
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+}
+
+.cashier-portal .submit-button:hover {
+    background-color: rgba(229, 57, 53, 0.7);
+    border-color: #e53935;
+}
+
+.cashier-portal .submit-button:active {
+    background-color: rgba(183, 28, 28, 0.8);
+    border-color: #b71c1c;
+}
