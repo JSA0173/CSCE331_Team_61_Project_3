@@ -7,9 +7,7 @@ body {
     padding: 20px;
 }
 
-h1 {
-    display: none; /* Hidden in the image view */
-}
+
 
 /* Accordion Styling */
 .accordion-item {
@@ -100,17 +98,27 @@ input::placeholder {
     color: #cbd5e0;
 }
 
-/* Return Home Button at Bottom */
-#managerbtn {
-    margin-top: 30px;
+.employeebutton {   
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
     background-color: rgba(255, 255, 255, .08);
-    border: 1px solid #ffffff4d;
-    font-size: 1rem;
-    padding: 10px 25px;
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    height: 50px;
+    width: 250px;
 }
-
-/* Return Home Button at Bottom */
-#managerbtn:hover {
+.employeebutton:hover {
     background-color: rgba(229, 57, 53, .7);
     border-color: #e53935;
+}
+
+.employeebutton:pressed {
+    background-color: rgba(183, 28, 28, .8);
+    border-color: #b71c1c;
 }

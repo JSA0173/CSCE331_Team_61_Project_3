@@ -100,9 +100,6 @@ function Report({ setView }) {
     return (
         <>
             <h1>Reports</h1>
-            <button className='employeebutton' id='managerbtn' onClick={() => setView('manager')}>
-                Return to Manager Portal Home
-            </button>
 
             {/* Product Usage */}
             <div className='accordion-item'>
@@ -235,6 +232,9 @@ function Report({ setView }) {
                     </div>
                 )}
             </div>
+            <button className='employeebutton' onClick={() => setView('manager')}>
+                Return to Manager Portal Home
+            </button>
         </>
     );
 }
