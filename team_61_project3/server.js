@@ -17,6 +17,8 @@ app.use('/api/employees',   require('./routes/employees'));
 app.use('/api/orders',      require('./routes/orders'));
 app.use('/api/reports',     require('./routes/reports'));
 app.use('/api/ingredients', require('./routes/ingredients'));
+app.use('/api/chat', require('./routes/chat'));
+
 
 // Reset sequences on startup
 async function resetSequences() {
