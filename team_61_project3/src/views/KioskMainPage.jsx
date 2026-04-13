@@ -1,25 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './KioskMainPage.css';
 import MenuPage from './MenuKioskPage';
 import CustomItemPage from './CustomItemPage';
-
 function KioskMainPage({ setView }) {
     const [kioskView, setKioskView] = useState('home');
     const [cart, setCart] = useState([]);
     const [cartTotal, setCartTotal] = useState(0);
     const [customerName, setCustomerName] = useState('');
-
+    const [weather, setWeather] = useState(null);
+    useEffect(() => {
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=30.628&longitude=-96.3344&current=temperature_2m,weather_code&temperature_unit=fahrenheit')
+            .then(res => res.json())
+            .then(data => setWeather(data.current))
+            .catch(err => console.error('Failed to load weather:', err));
+    }, []);
+    const weatherDescription = (code) => {
+        if (code === 0) return 'Clear ☀️';
+        if (code <= 3) return 'Partly Cloudy ⛅';
+        if (code <= 48) return 'Foggy 🌫️';
+        if (code <= 67) return 'Rainy 🌧️';
+        if (code <= 77) return 'Snowy ❄️';
+        if (code <= 82) return 'Showers 🌦️';
+        if (code <= 86) return 'Snow Showers 🌨️';
+        return 'Thunderstorm ⛈️';
+    };
     function addToCart(lineItem) {
         setCart(prev => [...prev, lineItem]);
         setCartTotal(prev => prev + lineItem.price);
     }
-
     function clearCart() {
         setCart([]);
         setCartTotal(0);
         setCustomerName('');
     }
-
     async function submitOrder() {
         if (cart.length === 0) {
             alert('Add at least one drink first.');
@@ -43,32 +56,28 @@ function KioskMainPage({ setView }) {
             alert('Order failed: ' + err.message);
         }
     }
-
     if (kioskView === 'menu')
         return <MenuPage setView={setKioskView} addToCart={addToCart} />;
-
     if (kioskView === 'custom')
         return <CustomItemPage setView={setKioskView} onAdd={addToCart} />;
-
     return (
         <div className="kiosk-main">
-
             <div className="title-section">
                 <h1>Kiosk</h1>
+                {weather && (
+                    <div className="weather-widget">
+                        College Station: {Math.round(weather.temperature_2m)}°F · {weatherDescription(weather.weather_code)}
+                    </div>
+                )}
             </div>
-
             <div className="menu-section" onClick={() => setKioskView('menu')}>
                 <h2>Menu</h2>
             </div>
-
             <div className="custom-item-section" onClick={() => setKioskView('custom')}>
                 <h2>Custom Item</h2>
             </div>
-
             <div className="cart-section">
                 <h2>Cart</h2>
-
-                {/* Customer name input lives here */}
                 <div style={{ marginBottom: '12px' }}>
                     <label style={{ fontWeight: 600, marginRight: '8px' }}>Name:</label>
                     <input
@@ -102,5 +111,4 @@ function KioskMainPage({ setView }) {
         </div>
     );
 }
-
 export default KioskMainPage;
