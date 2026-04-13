@@ -133,10 +133,12 @@ function Employee({ setView }) {
                     ))}
                 </tbody>
             </table>
-            <button className="employeebutton" id='back' onClick={() => setView('manager')}>Return to Manager Portal Home</button>
-            <button className="employeebutton" id='addemp' onClick={addEmployee}>Add Employee</button>
-            <button className="employeebutton" id='editemp' onClick={editEmployee}>Edit Employee</button>
-            <button className="employeebutton" id='deleteemp' onClick={deleteEmployee}>Delete Employee</button>
+            <div className = 'buttonrow'>
+            <button className="employeebutton" onClick={() => setView('manager')}>Return to Manager Portal Home</button>
+            <button className="employeebutton" onClick={addEmployee}>Add Employee</button>
+            <button className="employeebutton" onClick={editEmployee}>Edit Employee</button>
+            <button className="employeebutton" onClick={deleteEmployee}>Delete Employee</button>
+            </div>
         </>
     );
 }

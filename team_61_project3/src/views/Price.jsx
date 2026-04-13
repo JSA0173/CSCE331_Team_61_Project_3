@@ -112,10 +112,12 @@ function Price({ setView }) {
                     ))}
                 </tbody>
             </table>
+            <div className = 'buttonrow'>
             <button className='employeebutton' onClick={() => setView('manager')}>Return to Manager Portal Home</button>
             <button className='employeebutton' onClick={addItem}>Add Item</button>
             <button className='employeebutton' onClick={updatePrice}>Update Price</button>
             <button className='employeebutton' onClick={toggleEnabled}>Toggle Enabled</button>
+            </div>
         </>
     );
 }

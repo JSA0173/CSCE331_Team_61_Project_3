@@ -77,3 +77,8 @@ td.even {
     background-color: rgba(183, 28, 28, .8);
     border-color: #b71c1c;
 }
+.buttonrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}

@@ -104,11 +104,13 @@ function Inventory({ setView }) {
                     ))}
                 </tbody>
             </table>
+            <div className = 'buttonrow'>
             <button className='employeebutton' id='managerbtn' onClick={() => setView('manager')}>
                 Return to Manager Portal Home
             </button>
             <button className='employeebutton' onClick={addItem}>Add Item</button>
             <button className='employeebutton' onClick={updateItem}>Update Item</button>
+            </div>
         </>
     );
 }
