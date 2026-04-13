@@ -7,20 +7,20 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Customer Name Header */
-.customer-input-section {
+/* Scoped Customer Name Header */
+.cashier-container .customer-input-section {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 25px;
 }
 
-.customer-input-section label {
+.cashier-container .customer-input-section label {
     font-weight: bold;
     font-size: 1.1rem;
 }
 
-.customer-input-section input {
+.cashier-container .customer-input-section input {
     background-color: #2d334a;
     border: 1px solid #444;
     color: white;
@@ -29,8 +29,8 @@
     width: 250px;
 }
 
-/* Red Label Headers */
-.section-header {
+/* Scoped Red Label Headers */
+.cashier-container .section-header {
     background-color: #7a2222;
     color: white;
     padding: 6px 12px;
@@ -41,15 +41,15 @@
     margin-bottom: 12px;
 }
 
-/* Layout for Options */
-.options-grid {
+/* Scoped Layout for Options */
+.cashier-container .options-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
     padding-bottom: 10px;
 }
 
-.option-item {
+.cashier-container .option-item {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -58,21 +58,20 @@
     white-space: nowrap;
 }
 
-/* Radio & Checkbox sizing */
-.option-item input {
+.cashier-container .option-item input {
     cursor: pointer;
-    accent-color: #7a2222; /* Matches the theme */
+    accent-color: #7a2222; 
 }
 
-/* Footer Action Buttons */
-.action-footer {
+/* Scoped Footer Action Buttons */
+.cashier-container .action-footer {
     margin-top: 60px;
     display: flex;
     justify-content: center;
     gap: 25px;
 }
 
-.btn-back {
+.cashier-container .btn-back {
     background-color: #3b425e;
     color: white;
     padding: 12px 45px;
@@ -83,11 +82,11 @@
     transition: background 0.2s;
 }
 
-.btn-back:hover {
+.cashier-container .btn-back:hover {
     background-color: #4a5375;
 }
 
-.btn-add {
+.cashier-container .btn-add {
     background-color: #7a2222;
     color: white;
     padding: 12px 45px;
@@ -99,6 +98,6 @@
     transition: background 0.2s;
 }
 
-.btn-add:hover {
+.cashier-container .btn-add:hover {
     background-color: #962a2a;
 }

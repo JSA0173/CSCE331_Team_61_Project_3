@@ -61,7 +61,7 @@ function ToggleKioskMenu({ item, onAdd, onBack }) {
     return (
         <div className="kiosk-toggle-container">
 
-            <div className="section-header">Bases and Flavorings</div>
+            <div className="kiosk-section-header">Bases and Flavorings</div>
             <div className="options-grid">
                 {bases.map(b => (
                     <label key={b.inventoryId} className="option-item">
@@ -75,7 +75,7 @@ function ToggleKioskMenu({ item, onAdd, onBack }) {
                 ))}
             </div>
 
-            <div className="section-header">Toppings (select up to 5)</div>
+            <div className="kiosk-section-header">Toppings (select up to 5)</div>
             <div className="options-grid">
                 {toppings.map(t => (
                     <label key={t.inventoryId} className="option-item">
@@ -89,26 +89,26 @@ function ToggleKioskMenu({ item, onAdd, onBack }) {
                 ))}
             </div>
 
-            <div className="section-header">Size</div>
+            <div className="kiosk-section-header">Size</div>
             <div className="options-grid">
                 <label className="option-item"><input type="radio" checked={size === 'Normal'} onChange={() => setSize('Normal')} /> Regular</label>
                 <label className="option-item"><input type="radio" checked={size === 'Large'} onChange={() => setSize('Large')} /> Large (+$2.00)</label>
             </div>
 
-            <div className="section-header">Ice Level</div>
+            <div className="kiosk-section-header">Ice Level</div>
             <div className="options-grid">
                 <label className="option-item"><input type="radio" checked={iceLevel === 'NONE'} onChange={() => setIceLevel('NONE')} /> None</label>
                 <label className="option-item"><input type="radio" checked={iceLevel === 'LESS'} onChange={() => setIceLevel('LESS')} /> Less</label>
                 <label className="option-item"><input type="radio" checked={iceLevel === 'REGULAR'} onChange={() => setIceLevel('REGULAR')} /> Regular</label>
             </div>
 
-            <div className="section-header">Temperature</div>
+            <div className="kiosk-section-header">Temperature</div>
             <div className="options-grid">
                 <label className="option-item"><input type="radio" checked={temperature === 'COLD'} onChange={() => setTemperature('COLD')} /> Cold</label>
                 <label className="option-item"><input type="radio" checked={temperature === 'HOT'} onChange={() => setTemperature('HOT')} /> Hot</label>
             </div>
 
-            <div className="section-header">Sugar Level</div>
+            <div className="kiosk-section-header">Sugar Level</div>
             <div className="options-grid">
                 {[0, 25, 50, 75, 100].map(s => (
                     <label key={s} className="option-item">
