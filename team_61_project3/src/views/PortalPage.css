@@ -1,6 +1,6 @@
 body{
-    background: linear-gradient(to bottom, #1a1a2e, #16213e);
-    min-height: 100vh;
+    background: #1a1a2e;
+    
 }
 .text{
     font-family: "Segoe UI", sans-serif;
