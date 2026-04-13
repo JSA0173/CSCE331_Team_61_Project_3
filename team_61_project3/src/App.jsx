@@ -8,7 +8,8 @@ import Kiosk from './views/KioskMainPage'
 import Menu from './views/Menu'
 import CashierPortal from './views/CashierPortal'
 import ManagerPortal from './views/ManagerPortal'
-import LoginPage from './views/LoginPage'
+import LoginCashier from './views/LoginCashier'
+import LoginManager from './views/LoginManager'
 
 import Employee from './views/Employee'
 import Price from './views/Price'
@@ -33,7 +34,8 @@ function App() {
       {view === 'price' && <Price setView = {setView} />}
       {view === 'report' && <Report setView = {setView} />}
       {view === 'inventory' && <Inventory setView = {setView} />}
-      {view === 'login' && <LoginPage setView = {setView} />}
+      {view === 'loginManager' && <LoginManager setView = {setView} />}
+      {view === 'loginCashier' && <LoginCashier setView = {setView} />}
       <GoogleTranslate/>
     </div>
   )
