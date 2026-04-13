@@ -30,7 +30,11 @@ const MenuView = () => {
     { name: "Brown Sugar Taro Pearl Milk Tea", price: 11.00 },
     { name: "Brown Sugar Mango Green Milk Tea", price: 11.00 },
     { name: "Brown Sugar Coconut Pearl Milk Tea", price: 11.00 },
-    { name: "Custom Normal Tea", price: 0.00 },
+  ];
+
+  const extrasItems = [
+    { name: "Extra Item", price: 1.00 },
+    { name: "Extra Item", price: 1.50 },
   ];
 
   return (
@@ -47,7 +51,7 @@ const MenuView = () => {
         </div>
 
       </header>
-
+      
       <main className="menu-grid">
         {menuItems.map((item, index) => (
           <div key={index} className="menu-item">
@@ -56,6 +60,17 @@ const MenuView = () => {
           </div>
         ))}
       </main>
+      
+      <h2 className="section-title">Extras</h2>
+
+      <div className="menu-grid">
+        {extrasItems.map((item, index) => (
+          <div key={index} className="menu-item">
+            <span className="menu-item-text">{item.name}</span>
+            <span className="menu-item-text">${item.price.toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
       
     </div>
   );
