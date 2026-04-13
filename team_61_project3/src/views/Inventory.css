@@ -1,0 +1,84 @@
+.data-table {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.tableheader {
+  background-color: rgba(229, 57, 53, 0.6);
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+/* Round top corners on first/last header cells */
+thead tr th:first-child {
+  border-radius: 10px 0 0 0;
+}
+thead tr th:last-child {
+  border-radius: 0 10px 0 0;
+}
+
+.data-table tbody tr {
+  height: 30px;
+}
+
+.data-table tbody tr:hover td {
+  background-color: rgba(229, 57, 53, 0.3);
+}
+
+.data-table tbody tr:focus-within td,
+.data-table tbody tr.selected td {
+  background-color: rgba(229, 57, 53, 0.6);
+}
+
+td.odd {
+  background-color: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  padding: 6px 12px;
+}
+
+td.even {
+  background-color: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+  padding: 6px 12px;
+}
+.employeebutton {   
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    height: 50px;
+    width: 250px;
+}
+.employeebutton:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
+}
+
+.employeebutton:pressed {
+    background-color: rgba(183, 28, 28, .8);
+    border-color: #b71c1c;
+}
+.buttonrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}

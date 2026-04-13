@@ -30,7 +30,33 @@ const MenuView = () => {
     { name: "Brown Sugar Taro Pearl Milk Tea", price: 11.00 },
     { name: "Brown Sugar Mango Green Milk Tea", price: 11.00 },
     { name: "Brown Sugar Coconut Pearl Milk Tea", price: 11.00 },
-    { name: "Custom Normal Tea", price: 0.00 },
+  ];
+
+  const flavorItems = [
+    { name: "Honey", price: 1.50 },
+    { name: "Mango", price: 1.50 },
+    { name: "Coconut", price: 1.50 },
+    { name: "Taro", price: 1.50 },
+    { name: "Berry", price: 1.50 },
+    { name: "Peach Tea", price: 1.50 },
+    { name: "Passion Fruit", price: 1.50 },
+    { name: "Strawberry", price: 1.50 },
+    { name: "Halo Halo", price: 1.50 },
+    { name: "Lemon", price: 2.00 },
+  ];
+
+const toppingItems = [
+    { name: "Lychee", price: 1.25 },
+    { name: "Pearls (Boba)", price: 1.25 },
+    { name: "Coffee Jelly", price: 1.25 },
+    { name: "Pudding", price: 1.25 },
+    { name: "Lychee Jelly", price: 1.25 },
+    { name: "Honey Jelly", price: 1.25 },
+    { name: "Crystal Boba", price: 1.25 },
+    { name: "Mango Popping Boba", price: 1.25 },
+    { name: "Strawberry Popping Boba", price: 1.25 },
+    { name: "Ice cream", price: 1.25 },
+    { name: "Creama", price: 1.25 },
   ];
 
   return (
@@ -47,15 +73,35 @@ const MenuView = () => {
         </div>
 
       </header>
-
+      
       <main className="menu-grid">
         {menuItems.map((item, index) => (
           <div key={index} className="menu-item">
-            <span className="item-text">{item.name}</span>
-            <span className="item-text">${item.price.toFixed(2)}</span>
+            <span className="menu-item-text">{item.name}</span>
+            <span className="menu-item-text">${item.price.toFixed(2)}</span>
           </div>
         ))}
       </main>
+      
+      <h2 className="section-title">Flavors</h2>
+      <div className="menu-grid">
+          {flavorItems.map((item, index) => (
+              <div key={index} className="menu-item">
+                  <span className="menu-item-text">{item.name}</span>
+                  <span className="menu-item-text">${item.price.toFixed(2)}</span>
+              </div>
+          ))}
+      </div>
+
+      <h2 className="section-title">Toppings</h2>
+      <div className="menu-grid">
+          {toppingItems.map((item, index) => (
+              <div key={index} className="menu-item">
+                  <span className="menu-item-text">{item.name}</span>
+                  <span className="menu-item-text">${item.price.toFixed(2)}</span>
+              </div>
+          ))}
+      </div>
       
     </div>
   );

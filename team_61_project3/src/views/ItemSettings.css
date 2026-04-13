@@ -1,0 +1,104 @@
+.pos-container {
+  background-color: #141b2d;
+  color: #ffffff;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.customer-input-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.customer-input-row label {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.customer-input-row input {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  width: 250px;
+}
+
+.menu-section {
+  margin-bottom: 20px;
+}
+
+.section-header-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  background-color: #8b2626; 
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border-radius: 4px 4px 0 0;
+  text-transform: capitalize;
+}
+
+.section-extra {
+  color: #a0aec0;
+  font-size: 0.75rem;
+  margin-left: 10px;
+}
+
+.options-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  padding: 5px 0;
+}
+
+.checkbox-item, .radio-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+input[type="checkbox"], input[type="radio"] {
+  accent-color: #e53e3e;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.footer-actions {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.btn-back {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+  color: white;
+  padding: 10px 40px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-add {
+  background-color: #5d2222;
+  border: 1px solid #4a5568;
+  color: white;
+  padding: 10px 40px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-add:hover {
+  background-color: #8b2626;
+}

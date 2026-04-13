@@ -1,56 +1,107 @@
-import React from 'react';
-import './Kiosk.css';
+import { useState, useEffect } from 'react';
+import './Kiosk.css'
+import ToggleMenu from './ToggleMenu';
 
-const CashierView = () => {
-  const menuItems = [
-    { name: "Classic Pearl Milk Tea", price: 10.30 },
-    { name: "Honey Pearl Milk Tea", price: 10.50 },
-    { name: "Coffee Creama", price: 11.00 },
-    { name: "Coffee Milk Tea w/Coffee Jelly", price: 10.75 },
-    { name: "Hokkaido Milk Tea", price: 10.75 },
-    { name: "Thai Pearl Milk Tea", price: 10.75 },
-    { name: "Taro Pearl Milk Tea", price: 10.75 },
-    { name: "Mango Green Milk Tea", price: 11.00 },
-    { name: "Coconut Pearl Milk Tea", price: 11.25 },
-    { name: "Classic Tea", price: 9.15 },
-    { name: "Honey Tea", price: 9.35 },
-    { name: "Mango Green Tea", price: 10.30 },
-    { name: "Berry Lychee Jelly", price: 10.75 },
-    { name: "Peach Tea w/Honey Jelly", price: 10.75 },
-    { name: "Mango & Passion Fruit Tea", price: 10.75 },
-    { name: "Honey Lemonade", price: 10.75 },
-    { name: "Strawberry Coconut", price: 11.00 },
-    { name: "Halo Halo", price: 11.45 },
-    { name: "Wintermelon Tea", price: 10.30 },
-    { name: "Wintermelon Milk Tea", price: 9.70 },
-    { name: "Brown Sugar Pearl Milk Tea", price: 11.00 },
-    { name: "Brown Sugar Coffee Milk Tea", price: 11.00 },
-    { name: "Brown Sugar Hokkaido Milk Tea", price: 11.00 },
-    { name: "Brown Sugar Thai Pearl Milk Tea", price: 11.00 },
-    { name: "Brown Sugar Taro Pearl Milk Tea", price: 11.00 },
-    { name: "Brown Sugar Mango Green Milk Tea", price: 11.00 },
-    { name: "Brown Sugar Coconut Pearl Milk Tea", price: 11.00 },
-    { name: "Custom Normal Tea", price: 0.00 },
-  ];
+function KioskPortal({ setView }) {
+    const [menuItems, setMenuItems] = useState([]);
+    const [cart, setCart] = useState([]);
+    const [cartTotal, setCartTotal] = useState(0);
+    const [customerName, setCustomerName] = useState('');
+    const [selectedItem, setSelectedItem] = useState(null);
 
-  return (
-    <div className="kiosk-container">
-      <h1>Kiosk</h1>
+    useEffect(() => {
+        fetch('/api/items/menu')
+            .then(res => res.json())
+            .then(data => setMenuItems(data))
+            .catch(err => console.error('Failed to load menu:', err));
+    }, []);
 
-      <main className="menu-grid">
-        {menuItems.map((item, index) => (
-          <button key={index} className="menu-button">
-            <span className="item-text">{item.name}</span>
-            <span className="item-text">${item.price.toFixed(2)}</span>
-          </button>
-        ))}
-      </main>
+    function addToCart(lineItem) {
+        setCart([...cart, lineItem]);
+        setCartTotal(cartTotal + lineItem.price);
+        setSelectedItem(null);
+    }
 
-      <footer className="footer-actions">
-        <button className="submit-btn">Submit Order</button>
-      </footer>
-    </div>
-  );
-};
+    async function submitOrder() {
+        if (cart.length === 0) {
+            alert('Add at least one drink first.');
+            return;
+        }
+        try {
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerName: customerName || 'ANONYMOUS',
+                    totalAmount: cartTotal,
+                    lineItems: cart
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Order failed');
+            alert(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
+            setCart([]);
+            setCartTotal(0);
+            setCustomerName('');
+        } catch (err) {
+            alert('Order failed: ' + err.message);
+        }
+    }
 
-export default CashierView;
+    if (selectedItem) {
+        return (
+            <ToggleMenu
+                item={selectedItem}
+                customerName={customerName}
+                setCustomerName={setCustomerName}
+                onAdd={addToCart}
+                onBack={() => setSelectedItem(null)}
+            />
+        );
+    }
+
+    return (
+        <div className="cashier-portal">
+            <h1>Kiosk</h1>
+
+            <div className="portal-layout">
+                <div className="menu-section">
+                    <h2>Menu</h2>
+                    <div className="menu-grid">
+                        {menuItems.map(item => (
+                            <button
+                                key={item.itemId}
+                                className="menu-item-button"
+                                onClick={() => setSelectedItem(item)}
+                            >
+                                {item.name}<br />
+                                ${parseFloat(item.basePrice).toFixed(2)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="cart-panel">
+                    <h2>Cart</h2>
+                    {cart.length === 0 && <p>Cart is empty</p>}
+                    {cart.map((li, i) => (
+                        <div key={i} className="cart-item">
+                            <strong>{li.drinkName}</strong> ({li.size}) - ${li.price.toFixed(2)}
+                            <div className="cart-item-details">
+                                {li.baseType} · {li.temperature} · Ice: {li.iceLevel} · Sugar: {li.sugarAmount}%
+                            </div>
+                        </div>
+                    ))}
+                    <div className="cart-total">
+                        Total: ${cartTotal.toFixed(2)}
+                    </div>
+                    <button className="submit-button" onClick={submitOrder}>
+                        Submit Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default KioskPortal;
