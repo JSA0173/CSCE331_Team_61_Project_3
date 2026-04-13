@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import './ToggleMenu.css';
+import './ToggleKioskMenu.css';
 
 function CustomItemPage({ onAdd, setView }) {
     const [bases, setBases] = useState([]);
@@ -66,7 +66,7 @@ function CustomItemPage({ onAdd, setView }) {
     };
 
     return (
-        <div className="cashier-container">
+        <div className="kiosk-toggle-container">
 
             <div className="customer-input-section">
                 <label>Current Price:</label>

@@ -30,21 +30,22 @@ function MenuKioskPage({ setView, addToCart }) {
     }
 
     return (
-        <div className="cashier-portal">
+        <div className="kiosk-toggle-container">
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
                 <button className="btn-back" onClick={() => setView('home')}>← Back</button>
-                <h1>Menu</h1>
+                <h1 style={{ color: '#002147', fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>Menu</h1>
             </div>
 
             <div className="menu-grid">
                 {menuItems.map(item => (
                     <button
                         key={item.itemId}
-                        className="menu-item-button"
+                        className="option-item"
+                        style={{ cursor: 'pointer', background: 'none', border: 'none', justifyContent: 'space-between' }}
                         onClick={() => setSelectedItem(item)}
                     >
-                        {item.name}<br />
-                        ${parseFloat(item.basePrice).toFixed(2)}
+                        <span>{item.name}</span>
+                        <span>${parseFloat(item.basePrice).toFixed(2)}</span>
                     </button>
                 ))}
             </div>
