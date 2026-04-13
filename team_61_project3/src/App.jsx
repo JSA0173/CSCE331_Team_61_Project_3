@@ -4,7 +4,7 @@ import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 
 import PortalPage from './views/PortalPage'
-import Kiosk from './views/Kiosk'
+import Kiosk from './views/KioskMainPage'
 import Menu from './views/Menu'
 import CashierPortal from './views/CashierPortal'
 import ManagerPortal from './views/ManagerPortal'
