@@ -61,4 +61,26 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const sql = `
+      SELECT * 
+      FROM public."Employees" 
+      WHERE "username" = $1 AND "password" = $2
+    `;
+
+    const { rows } = await pool.query(sql, [username, password]);
+
+    if (rows.length > 0) {
+      res.json({ success: true, user: rows[0] });
+    } else {
+      res.status(401).json({ message: 'Invalid username or password' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

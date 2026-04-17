@@ -1,0 +1,25 @@
+.managerButtons {
+  display: flex;
+  flex-direction: column;   /* stack inputs vertically */
+  align-items: center;      /* center horizontally */
+  gap: 10px;                /* spacing between fields */
+}
+.loginButton {
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .2);
+    border-radius: 10px;
+    cursor: hand;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 50px;
+    width: 100px;
+}
+.loginButton:hover {
+    background-color: rgba(229, 57, 53, .7);
+    border-color: #e53935;
+}
