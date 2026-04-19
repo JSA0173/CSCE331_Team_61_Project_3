@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
     const sql = `
       SELECT * 
       FROM public."Employees" 
-      WHERE "username" = $1 AND "password" = $2
+      WHERE "email" = $1 AND "password" = $2
     `;
 
     const { rows } = await pool.query(sql, [username, password]);

@@ -1,38 +1,34 @@
 import './LoginManager.css';
 
-function LoginManager({ setView }) {
+function LoginManager() {
   const handleManagerLogin = async () => {
-    const enteredUsername = document.querySelector('.Username').value;
-    const enteredPassword = document.querySelector('.Password').value;
-
+    const email = document.querySelector('.Email').value;
+    const password = document.querySelector('.Password').value;
     try {
-      const response = await fetch('api/employees', {
+      const response = await fetch('http://localhost:3000/api/employees/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: enteredUsername,
-          password: enteredPassword
-        })
+        body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log('Login successful');
-        setView('manager'); // 👈 switch view after login
-      } else {
-        alert(data.message);
+      if (!response.ok) {
+        const text = await response.text(); // safer than json()
+        throw new Error(text || 'Login failed');
       }
+
+      const data = await response.json();
+      console.log('Login success:', data);
+
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error:', err.message);
     }
   };
     return (
-        <div class = 'text'>
+        <div className = 'text'>
           <h1>Login</h1>
-          <h2>Enter Username and Password below:</h2>
-          <div class = 'managerButtons'>
-            <input type="text" className="Username" placeholder="Enter Username" />
+          <h2>Enter Email and Password below:</h2>
+          <div className = 'managerButtons'>
+            <input type="text" className="Email" placeholder="Enter Email" />
             <input type="text" className="Password" placeholder="Enter Password" />
           </div>
           <button className="loginButton" onClick={handleManagerLogin}>Login</button>
