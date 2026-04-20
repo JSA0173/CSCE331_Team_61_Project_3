@@ -120,11 +120,11 @@ function KioskMainPage({ setView }) {
             </div>
 
             <div className="menu-section" onClick={() => setKioskView('menu')}>
-                <h2>Menu</h2>
+                <h2>Order From Menu</h2>
             </div>
 
             <div className="custom-item-section" onClick={() => setKioskView('custom')}>
-                <h2>Custom Item</h2>
+                <h2>Order Custom Item</h2>
             </div>
 
             <div className="cart-section">

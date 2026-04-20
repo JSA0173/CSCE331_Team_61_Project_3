@@ -5,15 +5,15 @@
   min-height: 100vh;
   padding: 40px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "title    title"
-    "menu     cart"
-    "custom   cart"
-    "language back";
+  grid-template-rows: auto auto auto auto;
   gap: 30px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "title   title"
+    "menu    cart"
+    "custom  cart"
+    "language back";
 }
 
 .title-section {
@@ -51,8 +51,14 @@
   color: #002147;
 }
 
-.menu-section { grid-area: menu; }
-.custom-item-section { grid-area: custom; }
+.menu-section { 
+  grid-area: menu;
+  align-self: start;
+ }
+.custom-item-section { 
+  grid-area: custom;
+  align-self: start;
+}
 .language-section { grid-area: language; }
 
 .menu-section h2,
@@ -68,6 +74,7 @@
 
 .cart-section {
   grid-area: cart;
+  align-self: start;
   background-color: #fff;
   border: 2px solid #c9d6e8;
   border-radius: 4px;
