@@ -1,4 +1,8 @@
-app.post('/add-points', async (req, res) => {
+const express = require('express');
+const router = express.Router();
+const pool = require('../db');
+
+router.post('/add-points', async (req, res) => {
     try {
         let { phoneNumber, pointsToAdd } = req.body;
 
@@ -12,7 +16,7 @@ app.post('/add-points', async (req, res) => {
             points = points + VALUES(points)
         `;
 
-        await db.execute(query, [phoneNumber, pointsToAdd]);
+        await pool.execute(query, [phoneNumber, pointsToAdd]);
 
         res.json({ success: true });
     } catch (err) {
@@ -20,3 +24,5 @@ app.post('/add-points', async (req, res) => {
         res.status(500).json({ error: 'Database error' });
     }
 });
+
+module.exports = router;
