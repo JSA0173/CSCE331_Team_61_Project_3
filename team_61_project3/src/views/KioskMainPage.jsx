@@ -45,8 +45,9 @@ function KioskMainPage({ setView }) {
         return 'Thunderstorm ⛈️';
     };
 
-    function speak(text) {
-        if (!ttsEnabled) return;
+    function speak(text, force = false) {
+        if (!ttsEnabled && !force) return; 
+        
         window.speechSynthesis.cancel();
         const clean = text.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').trim();
         const utterance = new SpeechSynthesisUtterance(clean);
@@ -179,7 +180,16 @@ function KioskMainPage({ setView }) {
             {/*text to speech button */}
             <button
                 className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
-                onClick={() => setTtsEnabled(prev => !prev)}
+                onClick={() => {
+                    const willBeEnabled = !ttsEnabled;
+                    setTtsEnabled(willBeEnabled);
+
+                    if (willBeEnabled) {
+                        setTimeout(() => {
+                            speak('Text to speech enabled', true);
+                        }, 300);
+                    }
+                }}
                 aria-label={ttsEnabled ? 'Text to speech on' : 'Text to speech off'}
                 aria-pressed={ttsEnabled}
             >
