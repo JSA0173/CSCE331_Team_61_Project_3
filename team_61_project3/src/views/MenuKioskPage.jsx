@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './MenuKioskPage.css';
 import ToggleKioskMenu from './ToggleKioskMenu';
 
-function MenuKioskPage({ setView, addToCart }) {
+function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
     const [menuItems, setMenuItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
 
@@ -15,6 +15,7 @@ function MenuKioskPage({ setView, addToCart }) {
 
     function handleAdd(lineItem) {
         addToCart(lineItem);
+        speak(`${lineItem.drinkName} added to cart. Total: $${lineItem.price.toFixed(2)}`);
         setView('home');
         setSelectedItem(null);
     }
@@ -25,6 +26,8 @@ function MenuKioskPage({ setView, addToCart }) {
                 item={selectedItem}
                 onAdd={handleAdd}
                 onBack={() => setSelectedItem(null)}
+                speak={speak}
+                ttsEnabled={ttsEnabled}
             />
         );
     }
@@ -32,7 +35,10 @@ function MenuKioskPage({ setView, addToCart }) {
     return (
         <div className="kiosk-toggle-container">
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
-                <button className="btn-back" onClick={() => setView('home')}>← Back</button>
+                <button className="btn-back" onClick={() => {
+                    speak('Going back to home');
+                    setView('home');
+                }}>← Back</button>
                 <h1 style={{ color: '#002147', fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>Menu</h1>
             </div>
 
@@ -42,7 +48,10 @@ function MenuKioskPage({ setView, addToCart }) {
                         key={item.itemId}
                         className="option-item"
                         style={{ cursor: 'pointer', background: 'none', border: 'none', justifyContent: 'space-between' }}
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => {
+                            speak(`${item.name}, $${parseFloat(item.basePrice).toFixed(2)}`);
+                            setSelectedItem(item);
+                        }}
                     >
                         <span>{item.name}</span>
                         <span>${parseFloat(item.basePrice).toFixed(2)}</span>
