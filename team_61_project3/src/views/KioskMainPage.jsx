@@ -48,7 +48,8 @@ function KioskMainPage({ setView }) {
     function speak(text) {
         if (!ttsEnabled) return;
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
+        const clean = text.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').trim();
+        const utterance = new SpeechSynthesisUtterance(clean);
         window.speechSynthesis.speak(utterance);
     }
 
@@ -91,6 +92,7 @@ function KioskMainPage({ setView }) {
     async function submitOrder() {
         if (cart.length === 0) {
             alert('Add at least one drink first.');
+            speak(`Add at least one drink first.`);
             return;
         }
         try {
@@ -106,15 +108,16 @@ function KioskMainPage({ setView }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Order failed');
             alert(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
-            speak(`Order submitted! Your total is $${cartTotal.toFixed(2)}`);
+            speak(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
             clearCart();
         } catch (err) {
             alert('Order failed: ' + err.message);
+            speak('Order failed: ' + err.message);
         }
     }
 
     if (kioskView === 'menu')
-        return <MenuPage setView={setKioskView} addToCart={addToCart} />;
+        return <MenuPage setView={setKioskView} addToCart={addToCart} ttsEnabled={ttsEnabled} speak={speak} />;
 
     if (kioskView === 'custom')
         return <CustomItemPage setView={setKioskView} onAdd={addToCart} />;
@@ -177,24 +180,25 @@ function KioskMainPage({ setView }) {
             <button
                 className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
                 onClick={() => setTtsEnabled(prev => !prev)}
-                title={ttsEnabled ? 'TTS On' : 'TTS Off'}
-            > 
+                aria-label={ttsEnabled ? 'Text to speech on' : 'Text to speech off'}
+                aria-pressed={ttsEnabled}
+            >
                 🔊
             </button>
 
             {/* Chatbot Toggle Button */}
-            <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)}>
+            <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)} aria-label="Open chat assistant" aria-expanded={chatOpen}>
                 AI
             </button>
 
             {/* Chatbot Panel */}
             {chatOpen && (
-                <div className="chat-panel">
+                <div className="chat-panel" role="dialog" aria-label="Boba Assistant chat">
                     <div className="chat-header">
                         <span>Boba Assistant</span>
-                        <button className="chat-close-button" onClick={() => setChatOpen(false)}>×</button>
+                        <button className="chat-close-button" onClick={() => setChatOpen(false)} aria-label="Close chat">×</button>
                     </div>
-                    <div className="chat-messages">
+                    <div className="chat-messages" aria-live="polite" aria-label="Chat messages">
                         {chatMessages.map((msg, i) => (
                             <div key={i} className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}>
                                 {msg.text}
@@ -210,6 +214,7 @@ function KioskMainPage({ setView }) {
                             onChange={e => setChatInput(e.target.value)}
                             onKeyDown={e => { if (e.key === 'Enter') sendChatMessage(); }}
                             placeholder="Ask me anything..."
+                            aria-label="Chat message input"
                         />
                         <button className="chat-send-button" onClick={sendChatMessage} disabled={chatLoading}>
                             Send
