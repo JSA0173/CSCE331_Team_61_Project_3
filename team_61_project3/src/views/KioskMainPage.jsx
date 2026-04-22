@@ -11,6 +11,9 @@ function KioskMainPage({ setView }) {
     const [weather, setWeather] = useState(null);
     const [menuItems, setMenuItems] = useState([]);
 
+    // TTS State
+    const [ttsEnabled, setTtsEnabled] = useState(false);
+
     // Chatbot state
     const [chatOpen, setChatOpen] = useState(false);
     const [chatMessages, setChatMessages] = useState([
@@ -42,6 +45,13 @@ function KioskMainPage({ setView }) {
         return 'Thunderstorm ⛈️';
     };
 
+    function speak(text) {
+        if (!ttsEnabled) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(utterance);
+    }
+
     async function sendChatMessage() {
         if (!chatInput.trim() || chatLoading) return;
         const userMsg = chatInput.trim();
@@ -69,6 +79,7 @@ function KioskMainPage({ setView }) {
     function addToCart(lineItem) {
         setCart(prev => [...prev, lineItem]);
         setCartTotal(prev => prev + lineItem.price);
+        speak(`${lineItem.drinkName} added to cart`);
     }
 
     function clearCart() {
@@ -95,6 +106,7 @@ function KioskMainPage({ setView }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Order failed');
             alert(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
+            speak(`Order submitted! Your total is $${cartTotal.toFixed(2)}`);
             clearCart();
         } catch (err) {
             alert('Order failed: ' + err.message);
@@ -161,118 +173,45 @@ function KioskMainPage({ setView }) {
                 <button className="submit-button" onClick={submitOrder}>Submit Order</button>
             </div>
 
-            {/* Chatbot Toggle Button */}
+            {/*text to speech button */}
             <button
-                onClick={() => setChatOpen(!chatOpen)}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: '#e53935',
-                    color: '#fff',
-                    fontSize: '24px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    zIndex: 1000
-                }}
-            >
+                className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
+                onClick={() => setTtsEnabled(prev => !prev)}
+                title={ttsEnabled ? 'TTS On' : 'TTS Off'}
+            > 
+                🔊
+            </button>
+
+            {/* Chatbot Toggle Button */}
+            <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)}>
                 AI
             </button>
 
             {/* Chatbot Panel */}
             {chatOpen && (
-                <div style={{
-                    position: 'fixed',
-                    bottom: '90px',
-                    right: '20px',
-                    width: '340px',
-                    height: '450px',
-                    background: '#fff',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        padding: '12px 16px',
-                        background: '#e53935',
-                        color: '#fff',
-                        borderRadius: '12px 12px 0 0',
-                        fontWeight: 600,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
+                <div className="chat-panel">
+                    <div className="chat-header">
                         <span>Boba Assistant</span>
-                        <button
-                            onClick={() => setChatOpen(false)}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#fff',
-                                fontSize: '20px',
-                                cursor: 'pointer',
-                                padding: '0 4px'
-                            }}
-                        >
-                            ×
-                        </button>
+                        <button className="chat-close-button" onClick={() => setChatOpen(false)}>×</button>
                     </div>
-                    <div style={{
-                        flex: 1,
-                        padding: '12px',
-                        overflowY: 'auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px'
-                    }}>
+                    <div className="chat-messages">
                         {chatMessages.map((msg, i) => (
-                            <div key={i} style={{
-                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                                background: msg.role === 'user' ? '#e53935' : '#f1f1f1',
-                                color: msg.role === 'user' ? '#fff' : '#000',
-                                padding: '8px 12px',
-                                borderRadius: '12px',
-                                maxWidth: '80%',
-                                fontSize: '14px'
-                            }}>
+                            <div key={i} className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}>
                                 {msg.text}
                             </div>
                         ))}
-                        {chatLoading && <div style={{ color: '#888', fontSize: '13px' }}>Thinking...</div>}
+                        {chatLoading && <div className="chat-thinking">Thinking...</div>}
                     </div>
-                    <div style={{ padding: '12px', borderTop: '1px solid #eee', display: 'flex', gap: '6px' }}>
+                    <div className="chat-input-row">
                         <input
                             type="text"
+                            className="chat-input"
                             value={chatInput}
                             onChange={e => setChatInput(e.target.value)}
                             onKeyDown={e => { if (e.key === 'Enter') sendChatMessage(); }}
                             placeholder="Ask me anything..."
-                            style={{
-                                flex: 1,
-                                padding: '8px 12px',
-                                border: '1px solid #ccc',
-                                borderRadius: '6px',
-                                fontSize: '14px'
-                            }}
                         />
-                        <button
-                            onClick={sendChatMessage}
-                            disabled={chatLoading}
-                            style={{
-                                background: '#e53935',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '8px 16px',
-                                borderRadius: '6px',
-                                cursor: 'pointer'
-                            }}
-                        >
+                        <button className="chat-send-button" onClick={sendChatMessage} disabled={chatLoading}>
                             Send
                         </button>
                     </div>
