@@ -24,21 +24,24 @@ function App() {
   const [view, setView] = useState('portal');
   
   return (
-    <div>
-
-      {view === 'portal' && <PortalPage setView={setView}/>}
-      {view === 'kiosk' && <Kiosk setView = {setView}/>}
-      {view === 'manager' && <ManagerPortal setView = {setView}/>}
-      {view === 'cashier' && <CashierPortal setView = {setView}/>}
-      {view === 'menu' && <Menu setView = {setView}/>}
-      {view === 'employee' && <Employee setView = {setView} />}
-      {view === 'price' && <Price setView = {setView} />}
-      {view === 'report' && <Report setView = {setView} />}
-      {view === 'inventory' && <Inventory setView = {setView} />}
-      {view === 'loginManager' && <LoginManager setView = {setView} />}
-      {view === 'loginCashier' && <LoginCashier setView = {setView} />}
-      <GoogleTranslate/>
-    </div>
+    
+      <div>
+        <ScreenMagnifier zoom={2.5} lensSize={160}>
+          {view === 'portal' && <PortalPage setView={setView}/>}
+          {view === 'kiosk' && <Kiosk setView = {setView}/>}
+          {view === 'manager' && <ManagerPortal setView = {setView}/>}
+          {view === 'cashier' && <CashierPortal setView = {setView}/>}
+          {view === 'menu' && <Menu setView = {setView}/>}
+          {view === 'employee' && <Employee setView = {setView} />}
+          {view === 'price' && <Price setView = {setView} />}
+          {view === 'report' && <Report setView = {setView} />}
+          {view === 'inventory' && <Inventory setView = {setView} />}
+          {view === 'loginManager' && <LoginManager setView = {setView} />}
+          {view === 'loginCashier' && <LoginCashier setView = {setView} />}
+          <GoogleTranslate/>
+        </ScreenMagnifier>
+      </div>
+  
   )
 }
 
