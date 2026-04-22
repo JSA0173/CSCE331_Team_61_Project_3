@@ -23,3 +23,57 @@
     background-color: rgba(229, 57, 53, .7);
     border-color: #e53935;
 }
+
+.googleButton {
+  background-color: #fff;
+  color: #444;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.googleButton:hover {
+  background-color: #f1f1f1;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 16px 0;
+  gap: 8px;
+}
+
+.divider span {
+  color: #aaa;
+  font-size: 13px;
+}
+
+.profileCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.profilePhoto {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+.profileEmail {
+  color: #666;
+  font-size: 14px;
+}
+
+.errorText {
+  color: red;
+  font-size: 13px;
+  margin-top: 8px;
+}
