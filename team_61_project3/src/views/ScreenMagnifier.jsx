@@ -38,7 +38,6 @@ export default function ScreenMagnifier({
   const containerRef = useRef(null);
   const lensRef = useRef(null);
   const cloneRef = useRef(null);
-  const posRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
 
   const handleToggle = () => {
@@ -52,6 +51,7 @@ export default function ScreenMagnifier({
       if (!active || !containerRef.current || !lensRef.current) return;
 
       const rect = containerRef.current.getBoundingClientRect();
+      // x, y = cursor position relative to the container's top-left corner
       const x = clientX - rect.left;
       const y = clientY - rect.top;
       const half = lensSize / 2;
@@ -61,33 +61,42 @@ export default function ScreenMagnifier({
         return;
       }
 
-      posRef.current = { x, y };
-
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => {
         const lens = lensRef.current;
         const clone = cloneRef.current;
         if (!lens || !clone) return;
 
+        // Center the lens circle on the cursor
         lens.style.opacity = "1";
         lens.style.left = `${x - half}px`;
         lens.style.top = `${y - half}px`;
 
-        // Translate the clone so the cursor point lands at the lens center,
-        // then scale from the lens top-left origin.
-        const tx = -x * zoom + half;
-        const ty = -y * zoom + half;
-        clone.style.transform = `scale(${zoom}) translate(${tx / zoom}px, ${ty / zoom}px)`;
+        // The clone div is sized to the full container (rect.width x rect.height)
+        // and sits at (0,0) inside the lens. transformOrigin is "0 0".
+        //
+        // With transform: scale(zoom) translate(tx, ty):
+        //   a point (px, py) in clone-space lands at
+        //   ((px + tx) * zoom, (py + ty) * zoom) inside the lens.
+        //
+        // We want clone point (x, y) to appear at lens point (half, half):
+        //   (x + tx) * zoom = half  =>  tx = half/zoom - x
+        //   (y + ty) * zoom = half  =>  ty = half/zoom - y
+        const tx = half / zoom - x;
+        const ty = half / zoom - y;
+
+        // Also sync the clone's explicit dimensions to the container in case
+        // it has been resized since last render.
+        clone.style.width = `${rect.width}px`;
+        clone.style.height = `${rect.height}px`;
+        clone.style.transform = `scale(${zoom}) translate(${tx}px, ${ty}px)`;
       });
     },
     [active, lensSize, zoom]
   );
 
   // Mouse events
-  const onMouseMove = useCallback(
-    (e) => moveLens(e.clientX, e.clientY),
-    [moveLens]
-  );
+  const onMouseMove = useCallback((e) => moveLens(e.clientX, e.clientY), [moveLens]);
   const onMouseLeave = useCallback(() => {
     if (lensRef.current) lensRef.current.style.opacity = "0";
   }, []);
@@ -96,7 +105,6 @@ export default function ScreenMagnifier({
   const onTouchMove = useCallback(
     (e) => {
       if (!active) return;
-      // Don't call preventDefault here — let the component consumer decide
       const t = e.touches[0];
       moveLens(t.clientX, t.clientY);
     },
@@ -147,7 +155,7 @@ export default function ScreenMagnifier({
         {/* Original content — always visible */}
         {children}
 
-        {/* Lens portal */}
+        {/* Lens */}
         <div
           ref={lensRef}
           aria-hidden="true"
@@ -163,21 +171,23 @@ export default function ScreenMagnifier({
             overflow: "hidden",
             pointerEvents: "none",
             transition: "opacity 0.12s ease",
-            // Keep lens above other positioned children
             zIndex: 999,
           }}
         >
-          {/* Magnified clone of the content */}
+          {/*
+            Magnified clone. Sized explicitly to the container dimensions
+            (updated each frame) so the transform math stays correct regardless
+            of where the container sits on the page.
+          */}
           <div
             ref={cloneRef}
             style={{
               position: "absolute",
               top: 0,
               left: 0,
-              width: "100%",
-              height: "100%",
-              transformOrigin: "top left",
+              transformOrigin: "0 0",
               pointerEvents: "none",
+              // width/height set imperatively in moveLens to match container
             }}
           >
             {children}
@@ -188,7 +198,7 @@ export default function ScreenMagnifier({
   );
 }
 
-/* ---------- Fixed top-left control panel ---------- */
+/* ---------- Fixed top-left control panel (75% scale) ---------- */
 function ControlPanel({ active, onToggle, zoom, onZoomChange, minZoom, maxZoom }) {
   return (
     <div
@@ -197,6 +207,9 @@ function ControlPanel({ active, onToggle, zoom, onZoomChange, minZoom, maxZoom }
         top: 16,
         left: 16,
         zIndex: 9999,
+        // Scale the whole panel to 75% without affecting layout of page content
+        transform: "scale(0.75)",
+        transformOrigin: "top left",
         display: "flex",
         flexDirection: "column",
         gap: 10,
