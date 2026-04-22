@@ -16,6 +16,7 @@ import Price from './views/Price'
 import Report from './views/Reports'
 import Inventory from './views/Inventory'
 import GoogleTranslate from './views/GoogleTranslate'
+import ScreenMagnifier from "./views/ScreenMagnifier";
 /*imports for each view */
 
 
