@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import ProfileIcon from './ProfileIcon';
 import './Report.css';
 
-function Report({ setView }) {
+function Report({ setView, profile }) {
     const [zReportRun, setZReportRun] = useState(false);
 
     const [puStartDate, setPuStartDate] = useState('');
@@ -99,6 +100,7 @@ function Report({ setView }) {
 
     return (
         <>
+            <ProfileIcon profile={profile} setView={setView} />
             <h1>Reports</h1>
 
             {/* Product Usage */}

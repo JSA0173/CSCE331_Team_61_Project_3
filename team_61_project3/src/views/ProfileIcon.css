@@ -1,0 +1,80 @@
+.profileIconWrapper {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+  }
+  
+  .profileIconImg {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #ccc;
+    object-fit: cover;
+  }
+  
+  /* Dropdown hidden by default, shown on hover */
+  .profileDropdown {
+    display: none;
+    position: absolute;
+    top: 52px;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 12px;
+    min-width: 220px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .profileIconWrapper:hover .profileDropdown {
+    display: flex;
+  }
+  
+  .profileDropdownHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  
+  .profileDropdownImg {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .profileDropdownName {
+    font-weight: bold;
+    margin: 0;
+    font-size: 14px;
+  }
+  
+  .profileDropdownEmail {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .profileDropdown button {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+  }
+  
+  .profileDropdown button:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .logoutBtn {
+    color: red !important;
+  }

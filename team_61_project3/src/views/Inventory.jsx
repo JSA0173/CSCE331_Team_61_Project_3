@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import ProfileIcon from './ProfileIcon';
 import './Inventory.css'
 
-function Inventory({ setView }) {
+function Inventory({ setView, profile }) {
     const [inventory, setInventory] = useState([]);
 
     function loadInventory() {
@@ -79,6 +80,7 @@ function Inventory({ setView }) {
 
     return (
         <>
+            <ProfileIcon profile={profile} setView={setView} />
             <h1>Inventory</h1>
             <table className='data-table'>
                 <thead>

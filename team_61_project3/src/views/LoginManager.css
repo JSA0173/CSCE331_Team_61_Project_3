@@ -47,8 +47,10 @@
 }
 
 .divider span {
+  display: block;
   color: #aaa;
   font-size: 13px;
+  width: 100%;
 }
 
 .profileCard {

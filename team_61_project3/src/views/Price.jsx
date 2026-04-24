@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './Price.css';
+import ProfileIcon from './ProfileIcon';
 
-function Price({ setView }) {
+function Price({ setView, profile }) {
     const [items, setItems] = useState([]);
     const [selectedId, setSelectedId] = useState(null);
 
@@ -82,6 +83,7 @@ function Price({ setView }) {
 
     return (
         <>
+            <ProfileIcon profile={profile} setView={setView} />
             <h1>Prices</h1>
             <table className='data-table'>
                 <thead>
