@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-router.post('/add-points', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         let { phoneNumber, pointsToAdd } = req.body;
 
@@ -10,13 +10,14 @@ router.post('/add-points', async (req, res) => {
         phoneNumber = phoneNumber.replace(/\D/g, '');
 
         const query = `
-            INSERT INTO rewards (phone_number, points)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE
-            points = points + VALUES(points)
+            INSERT INTO public."Rewards" ("phone_number", "points")
+            VALUES ($1, $2)
+            ON CONFLICT ("phone_number")
+            DO UPDATE SET
+            "points" = public."Rewards"."points" + EXCLUDED."points"
         `;
 
-        await pool.execute(query, [phoneNumber, pointsToAdd]);
+        await pool.query(query, [phoneNumber, pointsToAdd]);
 
         res.json({ success: true });
     } catch (err) {
