@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import './PortalPage.css';
-import { TouchInput } from './TouchKeyboard'; 
+import { TouchInput } from './Touchkeyboard'; 
 import GoogleTranslate from './GoogleTranslate.jsx';
 
 function PortalPage({ setView }) {
@@ -8,33 +8,40 @@ function PortalPage({ setView }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
+  // Ref always holds the latest pin value — never stale in callbacks
+  const pinRef = useRef('');
+
   const handleCashierClick = () => {
     setPin('');
+    pinRef.current = '';
     setError('');
     setPinModalOpen(true);
   };
 
-  // Updated to accept an optional argument to bypass state lag
-  const handlePinSubmit = (currentPin) => {
-    // If currentPin is passed (from keyboard), use it. 
-    // Otherwise, use the 'pin' variable from state.
-    const pinToVerify = currentPin || pin;
-    
-    const entered = String(pinToVerify).trim();
+  const handlePinSubmit = () => {
+    const entered = String(pinRef.current).trim();
     const correct = String(import.meta.env.VITE_CASHIER_PASSWORD).trim();
 
-    if (entered === "") {
+    if (entered === correct) {
       setPinModalOpen(false);
       setView('cashier');
     } else {
       setError('Incorrect PIN. Try again.');
-      setPin(''); // Reset visual dots
+      setPin('');
+      pinRef.current = '';
     }
+  };
+
+  const handlePinChange = (val) => {
+    setPin(val);
+    pinRef.current = val; // keep ref in sync
+    setError('');
   };
 
   const handleCancel = () => {
     setPinModalOpen(false);
     setPin('');
+    pinRef.current = '';
     setError('');
   };
 
@@ -59,10 +66,8 @@ function PortalPage({ setView }) {
 
       <GoogleTranslate />
 
-      {/* PIN modal */}
       {pinModalOpen && (
         <>
-          {/* Backdrop */}
           <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:99997 }} />
           
           <div style={{
@@ -83,7 +88,6 @@ function PortalPage({ setView }) {
             <h3 style={{ margin:'0 0 6px', fontSize:20, color:'#1a1a2e' }}>Cashier Portal</h3>
             <p style={{ margin:'0 0 16px', fontSize:14, color:'#6b7a99' }}>Enter your PIN to continue</p>
 
-            {/* PIN display — dots for entered digits */}
             <div style={{ display:'flex', justifyContent:'center', gap:10, marginBottom:16 }}>
               {[0, 1, 2, 3, 4].map(i => (
                 <div key={i} style={{
@@ -94,19 +98,12 @@ function PortalPage({ setView }) {
               ))}
             </div>
 
-            {/* Hidden TouchInput — tapping it opens the numeric keyboard.
-                We use the "pin" from state and update it via onChange.
-            */}
             <TouchInput
               value={pin}
-              onChange={(val) => { 
-                setPin(val); 
-                setError(''); 
-              }}
+              onChange={handlePinChange}
               label="Cashier PIN"
               numeric
-              // When user taps "Enter" on the touch keyboard, it triggers this:
-              onEnter={() => handlePinSubmit(pin)} 
+              onEnter={handlePinSubmit}
               placeholder="Tap to enter PIN"
               style={{
                 width:         '100%',
@@ -134,16 +131,11 @@ function PortalPage({ setView }) {
                 color:'#4a5568', fontSize:15, cursor:'pointer',
               }}>Cancel</button>
               
-              <button 
-                onClick={() => handlePinSubmit(pin)} 
-                style={{
-                  flex:1, padding:'10px 0', borderRadius:8,
-                  border:'none', background:'#1a1a2e',
-                  color:'#fff', fontSize:15, fontWeight:600, cursor:'pointer',
-                }}
-              >
-                Enter
-              </button>
+              <button onClick={handlePinSubmit} style={{
+                flex:1, padding:'10px 0', borderRadius:8,
+                border:'none', background:'#1a1a2e',
+                color:'#fff', fontSize:15, fontWeight:600, cursor:'pointer',
+              }}>Enter</button>
             </div>
           </div>
         </>

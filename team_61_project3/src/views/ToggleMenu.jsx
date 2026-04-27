@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './ToggleMenu.css';
-import { TouchInput } from './TouchKeyboard';
+import { TouchInput } from './Touchkeyboard';
 
 function ToggleMenu({ item, customerName, setCustomerName, onAdd, onBack }) {
     const [bases, setBases] = useState([]);

@@ -16,7 +16,7 @@ import Report from './views/Reports'
 import Inventory from './views/Inventory'
 import GoogleTranslate from './views/GoogleTranslate'
 import ScreenMagnifier from "./views/ScreenMagnifier";
-import { KeyboardProvider } from './views/TouchKeyboard';
+import { KeyboardProvider } from './views/Touchkeyboard';
 
 function App() {
   const [view, setView] = useState('portal');
