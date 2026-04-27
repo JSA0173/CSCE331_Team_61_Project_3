@@ -86,7 +86,11 @@ function KioskMainPage({ setView }) {
         }
     }
 
-        
+    function clearCart() {
+        setCart([]);
+        setCartTotal(0);
+        setCustomerName('');
+    }    
 
     function addToCart(lineItem) {
         setCart(prev => {
