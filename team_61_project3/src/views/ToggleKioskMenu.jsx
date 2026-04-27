@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './ToggleKioskMenu.css';
+import './ToggleKioskMenuAlt.css';    // 👈 add import
 
-function ToggleKioskMenu({ item, onAdd, onBack }) {
+function ToggleKioskMenu({ item, onAdd, onBack, speak, ttsEnabled, altTheme }) {  // 👈 receive altTheme
     const [bases, setBases] = useState([]);
     const [toppings, setToppings] = useState([]);
     const [selectedBases, setSelectedBases] = useState(new Set());
@@ -59,7 +60,7 @@ function ToggleKioskMenu({ item, onAdd, onBack }) {
     };
 
     return (
-        <div className="kiosk-toggle-container">
+        <div className={altTheme ? "kiosk-toggle-container alt-theme" : "kiosk-toggle-container"}>  {/* 👈 */}
 
             <div className="kiosk-section-header">Bases and Flavorings</div>
             <div className="options-grid">

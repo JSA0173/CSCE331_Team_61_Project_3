@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import './MenuKioskPage.css';
+import './MenuKioskPageAlt.css';       // 👈 add import
 import ToggleKioskMenu from './ToggleKioskMenu';
 
-function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
+function MenuKioskPage({ setView, addToCart, speak, ttsEnabled, altTheme }) {  // 👈 receive altTheme
     const [menuItems, setMenuItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
 
@@ -28,18 +29,22 @@ function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
                 onBack={() => setSelectedItem(null)}
                 speak={speak}
                 ttsEnabled={ttsEnabled}
+                altTheme={altTheme}   // 👈 pass down
             />
         );
     }
 
     return (
-        <div className="kiosk-toggle-container">
+        <div className={altTheme ? "kiosk-toggle-container alt-theme" : "kiosk-toggle-container"}>  {/* 👈 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
                 <button className="btn-back" onClick={() => {
                     speak('Going back to home');
                     setView('home');
                 }}>← Back</button>
-                <h1 style={{ color: '#002147', fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>Menu</h1>
+                <h1 style={{ 
+                    color: altTheme ? '#f5e6c8' : '#002147',   // 👈 dynamic color
+                    fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' 
+                }}>Menu</h1>
             </div>
 
             <div className="menu-grid">

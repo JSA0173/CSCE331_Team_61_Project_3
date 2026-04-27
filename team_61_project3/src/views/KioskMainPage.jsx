@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './KioskMainPage.css';
+import './KioskMainPageAlt.css';
 import MenuPage from './MenuKioskPage';
 import CustomItemPage from './CustomItemPage';
 
@@ -10,6 +11,7 @@ function KioskMainPage({ setView }) {
     const [customerName, setCustomerName] = useState('');
     const [weather, setWeather] = useState(null);
     const [menuItems, setMenuItems] = useState([]);
+    const [altTheme, setAltTheme] = useState(false);
 
     // TTS State
     const [ttsEnabled, setTtsEnabled] = useState(false);
@@ -162,13 +164,13 @@ function KioskMainPage({ setView }) {
     }
 
     if (kioskView === 'menu')
-        return <MenuPage setView={setKioskView} addToCart={addToCart} ttsEnabled={ttsEnabled} speak={speak} />;
-
+        return <MenuPage setView={setKioskView} addToCart={addToCart} ttsEnabled={ttsEnabled} speak={speak} altTheme={altTheme} />;  
+    
     if (kioskView === 'custom')
-        return <CustomItemPage setView={setKioskView} onAdd={addToCart} />;
+        return <CustomItemPage setView={setKioskView} onAdd={addToCart} altTheme={altTheme} />;  
 
     return (
-        <div className="kiosk-main">
+        <div className={altTheme ? "kiosk-main alt-theme" : "kiosk-main"}>  
 
             <div className="title-section">
                 <h1>Kiosk</h1>
@@ -189,7 +191,6 @@ function KioskMainPage({ setView }) {
 
             <div className="cart-section">
                 <h2>Cart</h2>
-
                 <div style={{ marginBottom: '12px' }}>
                     <label style={{ fontWeight: 600, marginRight: '8px' }}>Name:</label>
                     <input
@@ -207,7 +208,6 @@ function KioskMainPage({ setView }) {
                         }}
                     />
                 </div>
-
                 {cart.length === 0 && <p>Cart is empty</p>}
                 {cart.map((li, i) => (
                     <div key={i} className="cart-item">
@@ -221,17 +221,13 @@ function KioskMainPage({ setView }) {
                 <button className="submit-button" onClick={submitOrder}>Submit Order</button>
             </div>
 
-            {/*text to speech button */}
             <button
                 className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
                 onClick={() => {
                     const willBeEnabled = !ttsEnabled;
                     setTtsEnabled(willBeEnabled);
-
                     if (willBeEnabled) {
-                        setTimeout(() => {
-                            speak('Text to speech enabled', true);
-                        }, 300);
+                        setTimeout(() => speak('Text to speech enabled', true), 300);
                     }
                 }}
                 aria-label={ttsEnabled ? 'Text to speech on' : 'Text to speech off'}
@@ -240,12 +236,20 @@ function KioskMainPage({ setView }) {
                 🔊
             </button>
 
+            {/* 👇 Theme toggle button */}
+            <button
+                className="theme-toggle-btn"
+                onClick={() => setAltTheme(!altTheme)}
+                aria-label="Toggle theme"
+            >
+                {altTheme ? '☀️' : '🌙'}
+            </button>
+
             {/* Chatbot Toggle Button */}
             <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)} aria-label="Open chat assistant" aria-expanded={chatOpen}>
                 AI
             </button>
 
-            {/* Chatbot Panel */}
             {chatOpen && (
                 <div className="chat-panel" role="dialog" aria-label="Boba Assistant chat">
                     <div className="chat-header">
