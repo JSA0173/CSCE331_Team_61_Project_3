@@ -64,7 +64,7 @@ function PortalPage({ setView }) {
         </button>
       </div>
 
-      <GoogleTranslate />
+      
 
       {pinModalOpen && (
         <>
