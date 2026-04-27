@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './KioskMainPage.css';
 import MenuPage from './MenuKioskPage';
 import CustomItemPage from './CustomItemPage';
+import { TouchInput } from './TouchKeyboard';
 
 function KioskMainPage({ setView }) {
     const [kioskView, setKioskView] = useState('home');
@@ -21,6 +22,13 @@ function KioskMainPage({ setView }) {
     ]);
     const [chatInput, setChatInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
+
+    // Rewards/phone modal state (replaces prompt())
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [pointsInput, setPointsInput] = useState('');
+    const [rewardsStep, setRewardsStep] = useState(null); // null | 'phone' | 'points'
+    const [availablePoints, setAvailablePoints] = useState(0);
+    const [pendingOrderCb, setPendingOrderCb] = useState(null);
 
     useEffect(() => {
         fetch('https://api.open-meteo.com/v1/forecast?latitude=30.628&longitude=-96.3344&current=temperature_2m,weather_code&temperature_unit=fahrenheit')
@@ -46,8 +54,7 @@ function KioskMainPage({ setView }) {
     };
 
     function speak(text, force = false) {
-        if (!ttsEnabled && !force) return; 
-        
+        if (!ttsEnabled && !force) return;
         window.speechSynthesis.cancel();
         const clean = text.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').trim();
         const utterance = new SpeechSynthesisUtterance(clean);
@@ -60,7 +67,6 @@ function KioskMainPage({ setView }) {
         setChatMessages(prev => [...prev, { role: 'user', text: userMsg }]);
         setChatInput('');
         setChatLoading(true);
-
         try {
             const menuContext = menuItems.map(i => `${i.name} ($${i.basePrice})`).join(', ');
             const res = await fetch('/api/chat', {
@@ -90,56 +96,72 @@ function KioskMainPage({ setView }) {
         setCustomerName('');
     }
 
+    // Replaces the prompt()-based flow with touch-friendly modals
     async function submitOrder() {
         if (cart.length === 0) {
             alert('Add at least one drink first.');
-            speak(`Add at least one drink first.`);
+            speak('Add at least one drink first.');
+            return;
+        }
+        // Start the rewards flow — open phone number modal
+        setPhoneNumber('');
+        setPointsInput('');
+        setRewardsStep('phone');
+    }
+
+    async function handlePhoneDone() {
+        // No phone entered — skip rewards entirely
+        if (!phoneNumber.trim()) {
+            setRewardsStep(null);
+            await finalizeOrder(null, 0);
             return;
         }
         try {
-            const phoneNumber = prompt("Enter phone number for rewards:");
-            let pointsToSpend = 0;
-            if (phoneNumber) {
-                const pointsRes = await fetch('/api/rewards/getPoints', {
+            const res = await fetch('/api/rewards/getPoints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber })
+            });
+            const data = await res.json();
+            const pts = data.points ?? 0;
+            if (pts > 0) {
+                setAvailablePoints(pts);
+                setPointsInput('0');
+                setRewardsStep('points');
+            } else {
+                setRewardsStep(null);
+                await finalizeOrder(phoneNumber, 0);
+            }
+        } catch {
+            setRewardsStep(null);
+            await finalizeOrder(phoneNumber, 0);
+        }
+    }
+
+    async function handlePointsDone() {
+        const pts = Math.max(0, Math.min(Number(pointsInput) || 0, availablePoints));
+        setRewardsStep(null);
+        await finalizeOrder(phoneNumber, pts);
+    }
+
+    async function finalizeOrder(phone, pointsToSpend) {
+        try {
+            let addedPoints = Math.floor(cartTotal / 5);
+            if (phone && pointsToSpend > 0) {
+                addedPoints -= pointsToSpend;
+                await fetch('/api/rewards', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phoneNumber })
+                    body: JSON.stringify({ phoneNumber: phone, pointsToAdd: addedPoints })
                 });
-                
-                const dataPoints = await pointsRes.json();
-                const points = dataPoints.points;
-
-                let addedPoints = Math.floor(cartTotal / 5);
-
-
-                if (points > 0) {
-                    pointsToSpend = prompt(`You have ${points} points. How many points would you like to spend? (Each point is worth $0.20)`);
-
-                    while (
-                        pointsToSpend === null ||
-                        isNaN(pointsToSpend) ||
-                        !Number.isInteger(Number(pointsToSpend)) ||
-                        Number(pointsToSpend) < 0 ||
-                        Number(pointsToSpend) > points
-                    ) {
-                        alert("Invalid number of points. Please re-enter");
-
-                        pointsToSpend = prompt(`You have ${points} points. How many points would you like to spend? (Each point is worth $0.20)`);
-                    }
-
-                    pointsToSpend = Number(pointsToSpend);
-                    addedPoints -= pointsToSpend;
-                }
-
-                const rewardRes = await fetch('/api/rewards', {
+            } else if (phone) {
+                await fetch('/api/rewards', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        phoneNumber: phoneNumber,
-                        pointsToAdd: addedPoints
-                    })
+                    body: JSON.stringify({ phoneNumber: phone, pointsToAdd: addedPoints })
                 });
             }
+
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -153,7 +175,7 @@ function KioskMainPage({ setView }) {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Order failed');
             alert(`Order #${data.orderId} submitted!\nTotal: $${finalTotal.toFixed(2)}`);
-            speak(`Order #${data.orderId} submitted!\nTotal: $${finalTotal.toFixed(2)}`);
+            speak(`Order #${data.orderId} submitted! Total: $${finalTotal.toFixed(2)}`);
             clearCart();
         } catch (err) {
             alert('Order failed: ' + err.message);
@@ -169,7 +191,6 @@ function KioskMainPage({ setView }) {
 
     return (
         <div className="kiosk-main">
-
             <div className="title-section">
                 <h1>Kiosk</h1>
                 {weather && (
@@ -195,21 +216,20 @@ function KioskMainPage({ setView }) {
 
             <div className="cart-section">
                 <h2>Cart</h2>
-
                 <div style={{ marginBottom: '12px' }}>
                     <label style={{ fontWeight: 600, marginRight: '8px' }}>Name:</label>
-                    <input
-                        type="text"
+                    <TouchInput
                         value={customerName}
-                        onChange={e => setCustomerName(e.target.value)}
+                        onChange={setCustomerName}
                         placeholder="Enter your name"
+                        label="Your Name"
                         style={{
                             padding: '6px 10px',
                             borderRadius: '4px',
                             border: '1px solid #c9d6e8',
                             fontSize: '14px',
                             width: '100%',
-                            marginTop: '4px'
+                            marginTop: '4px',
                         }}
                     />
                 </div>
@@ -233,31 +253,24 @@ function KioskMainPage({ setView }) {
                 </button>
             </div>
 
-            {/*text to speech button */}
+            {/* TTS button */}
             <button
                 className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
                 onClick={() => {
                     const willBeEnabled = !ttsEnabled;
                     setTtsEnabled(willBeEnabled);
-
-                    if (willBeEnabled) {
-                        setTimeout(() => {
-                            speak('Text to speech enabled', true);
-                        }, 300);
-                    }
+                    if (willBeEnabled) setTimeout(() => speak('Text to speech enabled', true), 300);
                 }}
                 aria-label={ttsEnabled ? 'Text to speech on' : 'Text to speech off'}
                 aria-pressed={ttsEnabled}
-            >
-                🔊
-            </button>
+            >🔊</button>
 
-            {/* Chatbot Toggle Button */}
+            {/* Chatbot toggle */}
             <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)} aria-label="Open chat assistant" aria-expanded={chatOpen}>
                 AI
             </button>
 
-            {/* Chatbot Panel */}
+            {/* Chatbot panel */}
             {chatOpen && (
                 <div className="chat-panel" role="dialog" aria-label="Boba Assistant chat">
                     <div className="chat-header">
@@ -273,13 +286,13 @@ function KioskMainPage({ setView }) {
                         {chatLoading && <div className="chat-thinking">Thinking...</div>}
                     </div>
                     <div className="chat-input-row">
-                        <input
-                            type="text"
-                            className="chat-input"
+                        <TouchInput
                             value={chatInput}
-                            onChange={e => setChatInput(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') sendChatMessage(); }}
+                            onChange={setChatInput}
                             placeholder="Ask me anything..."
+                            label="Chat"
+                            onEnter={sendChatMessage}
+                            className="chat-input"
                             aria-label="Chat message input"
                         />
                         <button className="chat-send-button" onClick={sendChatMessage} disabled={chatLoading}>
@@ -288,8 +301,108 @@ function KioskMainPage({ setView }) {
                     </div>
                 </div>
             )}
+
+            {/* ── Rewards: phone number modal ── */}
+            {rewardsStep === 'phone' && (
+                <RewardsModal title="Rewards Program" subtitle="Enter your phone number to earn & redeem points, or skip to continue.">
+                    <TouchInput
+                        value={phoneNumber}
+                        onChange={setPhoneNumber}
+                        placeholder="e.g. 5551234567"
+                        label="Phone Number"
+                        numeric
+                        onEnter={handlePhoneDone}
+                        style={modalInputStyle}
+                    />
+                    <div style={{ display:'flex', gap:12, marginTop:16 }}>
+                        <button style={modalBtnSecondary} onClick={() => { setRewardsStep(null); finalizeOrder(null, 0); }}>Skip</button>
+                        <button style={modalBtnPrimary} onClick={handlePhoneDone}>Continue</button>
+                    </div>
+                </RewardsModal>
+            )}
+
+            {/* ── Rewards: points modal ── */}
+            {rewardsStep === 'points' && (
+                <RewardsModal title="Redeem Points" subtitle={`You have ${availablePoints} points. Each point is worth $0.20. Enter how many to spend (or 0 to skip).`}>
+                    <TouchInput
+                        value={pointsInput}
+                        onChange={setPointsInput}
+                        placeholder="0"
+                        label="Points to spend"
+                        numeric
+                        onEnter={handlePointsDone}
+                        style={modalInputStyle}
+                    />
+                    <p style={{ fontSize:13, color:'#6b7a99', margin:'6px 0 0' }}>
+                        Discount: ${(Math.min(Number(pointsInput)||0, availablePoints) * 0.20).toFixed(2)}
+                    </p>
+                    <div style={{ display:'flex', gap:12, marginTop:16 }}>
+                        <button style={modalBtnSecondary} onClick={() => handlePointsDone()}>Use 0 Points</button>
+                        <button style={modalBtnPrimary} onClick={handlePointsDone}>Confirm</button>
+                    </div>
+                </RewardsModal>
+            )}
         </div>
     );
 }
+
+// ─── Rewards modal shell ──────────────────────────────────────────────────────
+function RewardsModal({ title, subtitle, children }) {
+    return (
+        <>
+            <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.45)', zIndex:99997 }} />
+            <div style={{
+                position:  'fixed',
+                top:       '50%',
+                left:      '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex:    99998,
+                background:'#fff',
+                borderRadius: 16,
+                padding:   '28px 32px',
+                minWidth:  320,
+                maxWidth:  420,
+                boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
+                width:     '90vw',
+            }}>
+                <h3 style={{ margin:'0 0 6px', fontSize:20, color:'#1a1a2e' }}>{title}</h3>
+                <p style={{ margin:'0 0 16px', fontSize:14, color:'#6b7a99' }}>{subtitle}</p>
+                {children}
+            </div>
+        </>
+    );
+}
+
+const modalInputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    fontSize: 16,
+    borderRadius: 8,
+    border: '1.5px solid #a0aabd',
+    boxSizing: 'border-box',
+};
+
+const modalBtnPrimary = {
+    flex: 1,
+    padding: '10px 0',
+    borderRadius: 8,
+    border: 'none',
+    background: '#4CAF50',
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+};
+
+const modalBtnSecondary = {
+    flex: 1,
+    padding: '10px 0',
+    borderRadius: 8,
+    border: '1.5px solid #a0aabd',
+    background: '#fff',
+    color: '#4a5568',
+    fontSize: 15,
+    cursor: 'pointer',
+};
 
 export default KioskMainPage;
