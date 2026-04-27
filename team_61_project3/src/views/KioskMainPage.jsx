@@ -205,7 +205,7 @@ function KioskMainPage({ setView }) {
             const pts = Number(data.points) || 0;
             if (pts > 0) {
                 setAvailablePoints(pts);
-                setPointsInput('0');
+                setPointsInput('');
                 setRewardsStep('points');
             } else {
                 setRewardsStep(null);
