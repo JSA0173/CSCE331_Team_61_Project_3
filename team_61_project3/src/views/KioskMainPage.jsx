@@ -3,7 +3,7 @@ import './KioskMainPage.css';
 import './KioskMainPageAlt.css';
 import MenuPage from './MenuKioskPage';
 import CustomItemPage from './CustomItemPage';
-import { TouchInput } from './TouchKeyboard';
+import { TouchInput } from './Touchkeyboard';
 
 function KioskMainPage({ setView }) {
     const [kioskView, setKioskView] = useState('home');
