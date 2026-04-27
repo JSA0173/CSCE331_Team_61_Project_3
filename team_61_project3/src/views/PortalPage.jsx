@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import './PortalPage.css';
-import { TouchInput } from './TouchKeyboard'; 
+import { TouchInput } from './Touchkeyboard'; 
 import GoogleTranslate from './GoogleTranslate.jsx';
 
 function PortalPage({ setView }) {
