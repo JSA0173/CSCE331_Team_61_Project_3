@@ -165,7 +165,7 @@ function KioskMainPage({ setView }) {
         return <MenuPage setView={setKioskView} addToCart={addToCart} ttsEnabled={ttsEnabled} speak={speak} />;
 
     if (kioskView === 'custom')
-        return <CustomItemPage setView={setKioskView} onAdd={addToCart} />;
+        return <CustomItemPage setView={setKioskView} onAdd={addToCart} speak={speak} />;
 
     return (
         <div className="kiosk-main">
@@ -179,11 +179,17 @@ function KioskMainPage({ setView }) {
                 )}
             </div>
 
-            <div className="menu-section" onClick={() => setKioskView('menu')}>
+            <div className="menu-section" onClick={() => {
+                speak('Order from menu');
+                setKioskView('menu');
+            }}>
                 <h2>Order From Menu</h2>
             </div>
 
-            <div className="custom-item-section" onClick={() => setKioskView('custom')}>
+            <div className="custom-item-section" onClick={() => {
+                speak('Order custom item');
+                setKioskView('custom');
+            }}>
                 <h2>Order Custom Item</h2>
             </div>
 
@@ -218,7 +224,13 @@ function KioskMainPage({ setView }) {
                     </div>
                 ))}
                 <div className="cart-total">Total: ${cartTotal.toFixed(2)}</div>
-                <button className="submit-button" onClick={submitOrder}>Submit Order</button>
+                <button
+                    className="submit-button"
+                    onClick={submitOrder}
+                    onMouseEnter={() => speak(`Submit order. Total: $${cartTotal.toFixed(2)}`)}
+                >
+                    Submit Order
+                </button>
             </div>
 
             {/*text to speech button */}

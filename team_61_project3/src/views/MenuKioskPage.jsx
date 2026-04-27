@@ -9,7 +9,10 @@ function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
     useEffect(() => {
         fetch('/api/items/menu')
             .then(res => res.json())
-            .then(data => setMenuItems(data))
+            .then(data => {
+                setMenuItems(data);
+                speak(`Menu loaded. ${data.length} items available. Select a drink to customize it.`);
+            })
             .catch(err => console.error('Failed to load menu:', err));
     }, []);
 
@@ -25,7 +28,10 @@ function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
             <ToggleKioskMenu
                 item={selectedItem}
                 onAdd={handleAdd}
-                onBack={() => setSelectedItem(null)}
+                onBack={() => {
+                    speak('Going back to menu');
+                    setSelectedItem(null);
+                }}
                 speak={speak}
                 ttsEnabled={ttsEnabled}
             />
