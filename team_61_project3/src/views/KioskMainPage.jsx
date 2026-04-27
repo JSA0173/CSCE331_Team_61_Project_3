@@ -91,13 +91,55 @@ function KioskMainPage({ setView }) {
     }
 
     async function submitOrder() {
-        const phoneNumber = prompt("Enter phone number for rewards:");
         if (cart.length === 0) {
             alert('Add at least one drink first.');
             speak(`Add at least one drink first.`);
             return;
         }
         try {
+            const phoneNumber = prompt("Enter phone number for rewards:");
+            let pointsToSpend = 0;
+            if (phoneNumber) {
+                const pointsRes = await fetch('/api/rewards/getPoints', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phoneNumber })
+                });
+                
+                const dataPoints = await pointsRes.json();
+                const points = dataPoints.points;
+
+                let addedPoints = Math.floor(cartTotal / 5);
+
+
+                if (points > 0) {
+                    pointsToSpend = prompt(`You have ${points} points. How many points would you like to spend? (Each point is worth $0.20)`);
+
+                    while (
+                        pointsToSpend === null ||
+                        isNaN(pointsToSpend) ||
+                        !Number.isInteger(Number(pointsToSpend)) ||
+                        Number(pointsToSpend) < 0 ||
+                        Number(pointsToSpend) > points
+                    ) {
+                        alert("Invalid number of points. Please re-enter");
+
+                        pointsToSpend = prompt(`You have ${points} points. How many points would you like to spend? (Each point is worth $0.20)`);
+                    }
+
+                    pointsToSpend = Number(pointsToSpend);
+                    addedPoints -= pointsToSpend;
+                }
+
+                const rewardRes = await fetch('/api/rewards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phoneNumber: phoneNumber,
+                        pointsToAdd: addedPoints
+                    })
+                });
+            }
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -107,20 +149,11 @@ function KioskMainPage({ setView }) {
                     lineItems: cart
                 })
             });
+            const finalTotal = cartTotal - pointsToSpend * 0.20;
             const data = await res.json();
-            if (phoneNumber) {
-                const rewardRes = await fetch('/api/rewards', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        phoneNumber: phoneNumber,
-                        pointsToAdd: Math.floor(cartTotal / 5)
-                    })
-                });
-            }
             if (!res.ok) throw new Error(data.error || 'Order failed');
-            alert(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
-            speak(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
+            alert(`Order #${data.orderId} submitted!\nTotal: $${finalTotal.toFixed(2)}`);
+            speak(`Order #${data.orderId} submitted!\nTotal: $${finalTotal.toFixed(2)}`);
             clearCart();
         } catch (err) {
             alert('Order failed: ' + err.message);

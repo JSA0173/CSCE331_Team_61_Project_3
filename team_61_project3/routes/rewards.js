@@ -26,4 +26,25 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.post('/getPoints', async (req, res) => {
+    try {
+        let { phoneNumber } = req.body;
+
+        phoneNumber = phoneNumber.replace(/\D/g, '');
+
+        const result = await pool.query(
+            `SELECT "points"
+             FROM public."Rewards"
+             WHERE "phone_number" = $1`,
+            [phoneNumber]
+        );
+
+        res.json({ points: result.rows[0]?.points || 0 });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
 module.exports = router;
