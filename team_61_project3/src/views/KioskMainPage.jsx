@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './KioskMainPage.css';
 import './KioskMainPageAlt.css';
 import MenuPage from './MenuKioskPage';
@@ -26,11 +26,37 @@ function KioskMainPage({ setView }) {
     const [chatLoading, setChatLoading] = useState(false);
 
     // Rewards/phone modal state (replaces prompt())
+    // Existing state
     const [phoneNumber, setPhoneNumber] = useState('');
+
+    // NEW: Create a ref to act as our vault
+    const phoneRef = useRef('');
+
+    // NEW: Create a custom change handler that updates both
+    const handlePhoneChange = (val) => {
+        // Safely extract the value whether it's an event object or a raw string
+        const newValue = val?.target ? val.target.value : val;
+        
+        // Update the visual UI
+        setPhoneNumber(newValue);
+        
+        // Update the vault (happens instantly, no re-render waiting)
+        phoneRef.current = newValue; 
+    };
+        // Existing state
     const [pointsInput, setPointsInput] = useState('');
+
+    // NEW: Ref to hold the absolute latest points value
+    const pointsRef = useRef('');
+
+    // NEW: Custom handler to update both state and the vault
+    const handlePointsChange = (val) => {
+        const newValue = val?.target ? val.target.value : val;
+        setPointsInput(newValue);
+        pointsRef.current = newValue;
+    };
     const [rewardsStep, setRewardsStep] = useState(null); // null | 'phone' | 'points'
     const [availablePoints, setAvailablePoints] = useState(0);
-    const [pendingOrderCb, setPendingOrderCb] = useState(null);
 
     useEffect(() => {
         fetch('https://api.open-meteo.com/v1/forecast?latitude=30.628&longitude=-96.3344&current=temperature_2m,weather_code&temperature_unit=fahrenheit')
@@ -94,7 +120,6 @@ function KioskMainPage({ setView }) {
 
     function addToCart(lineItem) {
         setCart(prev => {
-            // Check if identical item already exists (same drink, size, base, ice, temp, sugar)
             const existingIndex = prev.findIndex(li =>
                 li.drinkName === lineItem.drinkName &&
                 li.size === lineItem.size &&
@@ -105,7 +130,6 @@ function KioskMainPage({ setView }) {
             );
     
             if (existingIndex !== -1) {
-                // Increment quantity on existing item
                 const updated = [...prev];
                 updated[existingIndex] = {
                     ...updated[existingIndex],
@@ -114,7 +138,6 @@ function KioskMainPage({ setView }) {
                 return updated;
             }
     
-            // New item — add with quantity 1
             return [...prev, { ...lineItem, quantity: 1 }];
         });
         setCartTotal(prev => prev + lineItem.price);
@@ -127,7 +150,7 @@ function KioskMainPage({ setView }) {
             const item = updated[index];
             const newQty = (item.quantity || 1) + delta;
     
-            if (newQty < 1) return prev; // minimum of 1
+            if (newQty < 1) return prev;
     
             setCartTotal(tot => tot + (item.price * delta));
             updated[index] = { ...item, quantity: newQty };
@@ -144,57 +167,71 @@ function KioskMainPage({ setView }) {
         speak('Item removed from cart');
     }
 
-    // Replaces the prompt()-based flow with touch-friendly modals
     async function submitOrder() {
         if (cart.length === 0) {
             alert('Add at least one drink first.');
             speak('Add at least one drink first.');
             return;
         }
-        // Start the rewards flow — open phone number modal
         setPhoneNumber('');
         setPointsInput('');
         setRewardsStep('phone');
     }
 
     async function handlePhoneDone() {
-        // No phone entered — skip rewards entirely
-        if (!phoneNumber.trim()) {
+        // READ FROM THE REF, NOT THE STATE!
+        const currentPhone = phoneRef.current;
+        
+        const finalPhone = currentPhone.replace(/\D/g, '');
+        console.log("Phone number entered:", finalPhone);
+
+        // Update state to match the cleaned version
+        setPhoneNumber(finalPhone);
+        phoneRef.current = finalPhone;
+
+        if (!finalPhone.trim()) {
             setRewardsStep(null);
             await finalizeOrder(null, 0);
             return;
         }
+
         try {
             const res = await fetch('/api/rewards/getPoints', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phoneNumber })
+                body: JSON.stringify({ phoneNumber: finalPhone })
             });
             const data = await res.json();
-            const pts = data.points ?? 0;
+            const pts = Number(data.points) || 0;
             if (pts > 0) {
                 setAvailablePoints(pts);
                 setPointsInput('0');
                 setRewardsStep('points');
             } else {
                 setRewardsStep(null);
-                await finalizeOrder(phoneNumber, 0);
+                await finalizeOrder(finalPhone, 0);
             }
         } catch {
             setRewardsStep(null);
-            await finalizeOrder(phoneNumber, 0);
+            await finalizeOrder(finalPhone, 0);
         }
     }
 
     async function handlePointsDone() {
-        const pts = Math.max(0, Math.min(Number(pointsInput) || 0, availablePoints));
+        // READ FROM THE REF, NOT THE STATE
+        const currentPointsString = pointsRef.current;
+        
+        // Calculate the safe points value
+        const pts = Math.max(0, Math.min(Number(currentPointsString) || 0, availablePoints));
+        
         setRewardsStep(null);
-        await finalizeOrder(phoneNumber, pts);
+        await finalizeOrder(phoneNumber, pts); 
     }
 
     async function finalizeOrder(phone, pointsToSpend) {
         try {
             let addedPoints = Math.floor(cartTotal / 5);
+            console.log("Points to add:", addedPoints, "Points to spend:", pointsToSpend);
             if (phone && pointsToSpend > 0) {
                 addedPoints -= pointsToSpend;
                 await fetch('/api/rewards', {
@@ -291,7 +328,6 @@ function KioskMainPage({ setView }) {
                     <div key={i} className="cart-item">
                         <div className="cart-item-top">
                             <strong>{li.drinkName}</strong> ({li.size}) — ${(li.price * (li.quantity || 1)).toFixed(2)}
-                            {/* ✅ Remove button */}
                             <button
                                 className="cart-item-remove"
                                 onClick={() => removeFromCart(i)}
@@ -304,7 +340,6 @@ function KioskMainPage({ setView }) {
                         <div className="cart-item-details">
                             {li.baseType} · {li.temperature} · Ice: {li.iceLevel} · Sugar: {li.sugarAmount}%
                         </div>
-                        {/* ✅ Quantity controls */}
                         <div className="cart-item-qty">
                             <button
                                 className="qty-btn"
@@ -334,7 +369,7 @@ function KioskMainPage({ setView }) {
                 </button>
             </div>
 
-            {/*text to speech button */}
+            {/* TTS Button */}
             <button
                 className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
                 onClick={() => {
@@ -350,7 +385,7 @@ function KioskMainPage({ setView }) {
                 🔊
             </button>
 
-            {/* Theme toggle button */}
+            {/* Theme Toggle Button */}
             <button
                 className="theme-toggle-btn"
                 onClick={() => setAltTheme(!altTheme)}
@@ -359,7 +394,7 @@ function KioskMainPage({ setView }) {
                 {altTheme ? '☀️' : '🌙'}
             </button>
 
-            {/* Chatbot toggle */}
+            {/* Chatbot Toggle Button */}
             <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)} aria-label="Open chat assistant" aria-expanded={chatOpen}>
                 AI
             </button>
@@ -401,16 +436,17 @@ function KioskMainPage({ setView }) {
                 <RewardsModal title="Rewards Program" subtitle="Enter your phone number to earn & redeem points, or skip to continue.">
                     <TouchInput
                         value={phoneNumber}
-                        onChange={setPhoneNumber}
+                        onChange={handlePhoneChange} // <-- Use the new handler here
                         placeholder="e.g. 5551234567"
                         label="Phone Number"
-                        numeric
+                        numeric 
                         onEnter={handlePhoneDone}
                         style={modalInputStyle}
                     />
                     <div style={{ display:'flex', gap:12, marginTop:16 }}>
                         <button style={modalBtnSecondary} onClick={() => { setRewardsStep(null); finalizeOrder(null, 0); }}>Skip</button>
-                        <button style={modalBtnPrimary} onClick={handlePhoneDone}>Continue</button>
+                        {/* The Continue button works off the state, so we don't need to pass 'val' here */}
+                        <button style={modalBtnPrimary} onClick={() => handlePhoneDone()}>Continue</button>
                     </div>
                 </RewardsModal>
             )}
@@ -420,18 +456,22 @@ function KioskMainPage({ setView }) {
                 <RewardsModal title="Redeem Points" subtitle={`You have ${availablePoints} points. Each point is worth $0.20. Enter how many to spend (or 0 to skip).`}>
                     <TouchInput
                         value={pointsInput}
-                        onChange={setPointsInput}
+                        onChange={handlePointsChange} // <-- Use the new handler
                         placeholder="0"
                         label="Points to spend"
-                        numeric
+                        numeric 
                         onEnter={handlePointsDone}
                         style={modalInputStyle}
                     />
                     <p style={{ fontSize:13, color:'#6b7a99', margin:'6px 0 0' }}>
+                        {/* The visual discount calculation can still safely rely on the React state */}
                         Discount: ${(Math.min(Number(pointsInput)||0, availablePoints) * 0.20).toFixed(2)}
                     </p>
                     <div style={{ display:'flex', gap:12, marginTop:16 }}>
-                        <button style={modalBtnSecondary} onClick={() => handlePointsDone()}>Use 0 Points</button>
+                        <button style={modalBtnSecondary} onClick={() => {
+                            pointsRef.current = '0'; // Force ref to 0 for skip
+                            handlePointsDone();
+                        }}>Use 0 Points</button>
                         <button style={modalBtnPrimary} onClick={handlePointsDone}>Confirm</button>
                     </div>
                 </RewardsModal>

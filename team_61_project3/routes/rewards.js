@@ -39,7 +39,7 @@ router.post('/getPoints', async (req, res) => {
             [phoneNumber]
         );
 
-        res.json({ points: result.rows[0]?.points || 0 });
+        res.json({ points: Number(result.rows[0]?.points) || 0 });
 
     } catch (err) {
         console.error(err);
