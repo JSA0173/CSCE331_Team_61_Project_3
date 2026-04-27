@@ -86,6 +86,8 @@ function KioskMainPage({ setView }) {
         }
     }
 
+        
+
     function addToCart(lineItem) {
         setCart(prev => [...prev, lineItem]);
         setCartTotal(prev => prev + lineItem.price);
@@ -273,6 +275,15 @@ function KioskMainPage({ setView }) {
                 aria-pressed={ttsEnabled}
             >
                 🔊
+            </button>
+
+            {/* Theme toggle button */}
+            <button
+                className="theme-toggle-btn"
+                onClick={() => setAltTheme(!altTheme)}
+                aria-label="Toggle theme"
+            >
+                {altTheme ? '☀️' : '🌙'}
             </button>
 
             {/* Chatbot toggle */}
