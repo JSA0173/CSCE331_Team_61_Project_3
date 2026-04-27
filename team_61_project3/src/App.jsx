@@ -16,6 +16,7 @@ import Report from './views/Reports'
 import Inventory from './views/Inventory'
 import GoogleTranslate from './views/GoogleTranslate'
 import ScreenMagnifier from "./views/ScreenMagnifier";
+import { KeyboardProvider } from './views/TouchKeyboard';
 
 function App() {
   const [view, setView] = useState('portal');
@@ -24,6 +25,7 @@ function App() {
   return (
     <div>
       <ScreenMagnifier zoom={2.5} lensSize={160}>
+        <KeyboardProvider>
         {view === 'portal'       && <PortalPage setView={setView} />}
         {view === 'kiosk'        && <Kiosk setView={setView} />}
         {view === 'manager'      && <ManagerPortal setView={setView} profile={profile} />}  
@@ -36,6 +38,7 @@ function App() {
         {view === 'loginManager' && <LoginManager setView={setView} setProfile={setProfile} />}
         {view === 'loginCashier' && <LoginCashier setView={setView} />}
         <GoogleTranslate />
+        </KeyboardProvider>
       </ScreenMagnifier>
     </div>
   );
