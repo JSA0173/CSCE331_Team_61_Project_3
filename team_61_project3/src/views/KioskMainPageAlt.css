@@ -185,3 +185,21 @@
     border-color: #e0a84a;
     box-shadow: 0 0 6px rgba(201, 146, 58, 0.4);
 }
+
+.alt-theme .qty-btn {
+    border-color: #c9923a;
+    color: #c9923a;
+}
+
+.alt-theme .qty-btn:hover {
+    background: #c9923a;
+    color: #1c1008;
+}
+
+.alt-theme .qty-value {
+    color: #f5e6c8;
+}
+
+.alt-theme .cart-item-remove {
+    color: #e05c3a;
+}

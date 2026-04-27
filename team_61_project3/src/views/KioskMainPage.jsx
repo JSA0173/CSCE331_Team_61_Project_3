@@ -89,15 +89,55 @@ function KioskMainPage({ setView }) {
         
 
     function addToCart(lineItem) {
-        setCart(prev => [...prev, lineItem]);
+        setCart(prev => {
+            // Check if identical item already exists (same drink, size, base, ice, temp, sugar)
+            const existingIndex = prev.findIndex(li =>
+                li.drinkName === lineItem.drinkName &&
+                li.size === lineItem.size &&
+                li.baseType === lineItem.baseType &&
+                li.iceLevel === lineItem.iceLevel &&
+                li.temperature === lineItem.temperature &&
+                li.sugarAmount === lineItem.sugarAmount
+            );
+    
+            if (existingIndex !== -1) {
+                // Increment quantity on existing item
+                const updated = [...prev];
+                updated[existingIndex] = {
+                    ...updated[existingIndex],
+                    quantity: (updated[existingIndex].quantity || 1) + 1
+                };
+                return updated;
+            }
+    
+            // New item — add with quantity 1
+            return [...prev, { ...lineItem, quantity: 1 }];
+        });
         setCartTotal(prev => prev + lineItem.price);
         speak(`${lineItem.drinkName} added to cart`);
     }
-
-    function clearCart() {
-        setCart([]);
-        setCartTotal(0);
-        setCustomerName('');
+    
+    function updateQuantity(index, delta) {
+        setCart(prev => {
+            const updated = [...prev];
+            const item = updated[index];
+            const newQty = (item.quantity || 1) + delta;
+    
+            if (newQty < 1) return prev; // minimum of 1
+    
+            setCartTotal(tot => tot + (item.price * delta));
+            updated[index] = { ...item, quantity: newQty };
+            return updated;
+        });
+    }
+    
+    function removeFromCart(index) {
+        setCart(prev => {
+            const item = prev[index];
+            setCartTotal(tot => tot - item.price * (item.quantity || 1));
+            return prev.filter((_, i) => i !== index);
+        });
+        speak('Item removed from cart');
     }
 
     // Replaces the prompt()-based flow with touch-friendly modals
@@ -245,13 +285,42 @@ function KioskMainPage({ setView }) {
                 {cart.length === 0 && <p>Cart is empty</p>}
                 {cart.map((li, i) => (
                     <div key={i} className="cart-item">
-                        <strong>{li.drinkName}</strong> ({li.size}) — ${li.price.toFixed(2)}
+                        <div className="cart-item-top">
+                            <strong>{li.drinkName}</strong> ({li.size}) — ${(li.price * (li.quantity || 1)).toFixed(2)}
+                            {/* ✅ Remove button */}
+                            <button
+                                className="cart-item-remove"
+                                onClick={() => removeFromCart(i)}
+                                onMouseEnter={() => speak('Remove item')}
+                                aria-label="Remove item"
+                            >
+                                ✕
+                            </button>
+                        </div>
                         <div className="cart-item-details">
                             {li.baseType} · {li.temperature} · Ice: {li.iceLevel} · Sugar: {li.sugarAmount}%
                         </div>
+                        {/* ✅ Quantity controls */}
+                        <div className="cart-item-qty">
+                            <button
+                                className="qty-btn"
+                                onClick={() => updateQuantity(i, -1)}
+                                onMouseEnter={() => speak('Decrease quantity')}
+                                disabled={li.quantity <= 1}
+                            >
+                                −
+                            </button>
+                            <span className="qty-value">{li.quantity || 1}</span>
+                            <button
+                                className="qty-btn"
+                                onClick={() => updateQuantity(i, 1)}
+                                onMouseEnter={() => speak('Increase quantity')}
+                            >
+                                +
+                            </button>
+                        </div>
                     </div>
                 ))}
-                <div className="cart-total">Total: ${cartTotal.toFixed(2)}</div>
                 <button
                     className="submit-button"
                     onClick={submitOrder}
