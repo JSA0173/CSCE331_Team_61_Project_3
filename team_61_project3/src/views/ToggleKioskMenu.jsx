@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './ToggleKioskMenu.css';
 import './ToggleKioskMenuAlt.css';    // 👈 add import
 
-function ToggleKioskMenu({ item, onAdd, onBack, speak = () => {}, speak, ttsEnabled, altTheme }) {  // 👈 receive altTheme
+function ToggleKioskMenu({ item, onAdd, onBack, speak = () => {}, ttsEnabled, altTheme }) {  // 👈 receive altTheme
     const [bases, setBases] = useState([]);
     const [toppings, setToppings] = useState([]);
     const [selectedBases, setSelectedBases] = useState(new Set());
