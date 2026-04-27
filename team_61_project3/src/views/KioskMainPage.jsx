@@ -200,23 +200,28 @@ function KioskMainPage({ setView }) {
                 )}
             </div>
 
-            <div className="menu-section" onClick={() => {
-                speak('Order from menu');
-                setKioskView('menu');
-            }}>
+            <div 
+                className="menu-section" 
+                onMouseEnter={() => speak('Order from menu')}
+                onClick={() => setKioskView('menu')}
+            >
                 <h2>Order From Menu</h2>
             </div>
 
-            <div className="custom-item-section" onClick={() => {
-                speak('Order custom item');
-                setKioskView('custom');
-            }}>
+            <div 
+                className="custom-item-section" 
+                onMouseEnter={() => speak('Order custom item')}
+                onClick={() => setKioskView('custom')}
+            >
                 <h2>Order Custom Item</h2>
             </div>
 
             <div className="cart-section">
                 <h2>Cart</h2>
-                <div style={{ marginBottom: '12px' }}>
+                <div 
+                    style={{ marginBottom: '12px' }}
+                    onMouseEnter={() => speak('Enter your name')}
+                >
                     <label style={{ fontWeight: 600, marginRight: '8px' }}>Name:</label>
                     <TouchInput
                         value={customerName}

@@ -41,10 +41,13 @@ function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
     return (
         <div className="kiosk-toggle-container">
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
-                <button className="btn-back" onClick={() => {
-                    speak('Going back to home');
-                    setView('home');
-                }}>← Back</button>
+                <button 
+                    className="btn-back" 
+                    onMouseEnter={() => speak('Going back to home')}
+                    onClick={() => setView('home')}
+                >
+                    ← Back
+                </button>
                 <h1 style={{ color: '#002147', fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>Menu</h1>
             </div>
 
@@ -53,11 +56,9 @@ function MenuKioskPage({ setView, addToCart, speak, ttsEnabled }) {
                     <button
                         key={item.itemId}
                         className="option-item"
-                        style={{ cursor: 'pointer', background: 'none', border: 'none', justifyContent: 'space-between' }}
-                        onClick={() => {
-                            speak(`${item.name}, $${parseFloat(item.basePrice).toFixed(2)}`);
-                            setSelectedItem(item);
-                        }}
+                        style={{ cursor: 'pointer', background: 'none', border: 'none', justifyContent: 'space-between', display: 'flex', width: '100%' }}
+                        onMouseEnter={() => speak(`${item.name}, $${parseFloat(item.basePrice).toFixed(2)}`)}
+                        onClick={() => setSelectedItem(item)}
                     >
                         <span>{item.name}</span>
                         <span>${parseFloat(item.basePrice).toFixed(2)}</span>
