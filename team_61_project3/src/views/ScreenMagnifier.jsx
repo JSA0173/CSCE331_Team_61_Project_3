@@ -101,7 +101,7 @@ export default function ScreenMagnifier({
   useEffect(() => {
     if (!active) return;
     const initial  = setTimeout(takeSnapshot, 120);
-    const interval = setInterval(takeSnapshot, 1_000);
+    const interval = setInterval(takeSnapshot, 4_000);
     return () => { clearTimeout(initial); clearInterval(interval); };
   }, [active, snapshotKey, takeSnapshot]);
 
