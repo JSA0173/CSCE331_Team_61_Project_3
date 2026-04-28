@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './ToggleKioskMenu.css';
+import './ToggleKioskMenuAlt.css';
 
-function CustomItemPage({ onAdd, setView }) {
+function CustomItemPage({ onAdd, setView, speak = () => {}, altTheme }) {
     const [bases, setBases] = useState([]);
     const [toppings, setToppings] = useState([]);
     const [selectedBases, setSelectedBases] = useState(new Set());
@@ -18,14 +19,9 @@ function CustomItemPage({ onAdd, setView }) {
                 setBases(data.bases || []);
                 setToppings(data.toppings || []);
             });
-    }, []);
 
-    const toggleSet = (set, setSet, id) => {
-        const newSet = new Set(set);
-        if (newSet.has(id)) newSet.delete(id);
-        else newSet.add(id);
-        setSet(newSet);
-    };
+        speak('Custom item page. Select your bases, toppings, size, ice level, temperature, and sugar level.');
+    }, []);
 
     const calculatePrice = () => {
         const basesCost = bases
@@ -38,9 +34,39 @@ function CustomItemPage({ onAdd, setView }) {
         return basesCost + toppingsCost + sizeCost;
     };
 
+    const handleBaseToggle = (b) => {
+        const newSet = new Set(selectedBases);
+        if (newSet.has(b.inventoryId)) {
+            newSet.delete(b.inventoryId);
+        } else {
+            newSet.add(b.inventoryId);
+        }
+        setSelectedBases(newSet);
+    };
+
+    const handleToppingToggle = (t) => {
+        const newSet = new Set(selectedToppings);
+        if (newSet.has(t.inventoryId)) {
+            newSet.delete(t.inventoryId);
+        } else if (newSet.size >= 5) {
+            speak('Maximum of 5 toppings reached');
+            alert('You can only select up to 5 toppings.');
+            return;
+        } else {
+            newSet.add(t.inventoryId);
+        }
+        setSelectedToppings(newSet);
+    };
+
+    const handleSizeChange = (val) => setSize(val);
+    const handleIceChange = (val) => setIceLevel(val);
+    const handleTemperatureChange = (val) => setTemperature(val);
+    const handleSugarChange = (val) => setSugarAmount(val);
+
     const handleAdd = () => {
         if (selectedBases.size === 0) {
             alert('Please select at least one base.');
+            speak('Please select at least one base before adding to cart.');
             return;
         }
 
@@ -49,10 +75,13 @@ function CustomItemPage({ onAdd, setView }) {
         const baseType = baseObjs.map(b => b.name).join(', ');
         const toppingIds = topObjs.map(t => String(t.inventoryId));
         const price = calculatePrice();
+        const drinkName = size === 'Large' ? 'Custom Large Tea' : 'Custom Normal Tea';
+
+        speak(`${drinkName} added to cart. Total: $${price.toFixed(2)}`);
 
         onAdd({
             itemId: size === 'Large' ? 56 : 28,
-            drinkName: size === 'Large' ? 'Custom Large Tea' : 'Custom Normal Tea',
+            drinkName,
             size,
             baseType,
             iceLevel,
@@ -65,74 +94,116 @@ function CustomItemPage({ onAdd, setView }) {
         setView('home');
     };
 
-    return (
-        <div className="kiosk-toggle-container">
+    const handleBack = () => {
+        setView('home');
+    };
 
-            <div className="customer-input-section">
-                <label>Current Price:</label>
-                <strong style={{ fontSize: '1.2rem' }}>${calculatePrice().toFixed(2)}</strong>
+    return (
+        <div className={altTheme ? "kiosk-toggle-container alt-theme" : "kiosk-toggle-container"} style={{ position: 'relative' }}>
+
+            <div style={{ position: 'absolute', top: '30px', right: '40px', color: '#002147', textAlign: 'right' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Price</div>
+                <strong style={{ fontSize: '2rem' }}>${calculatePrice().toFixed(2)}</strong>
             </div>
 
-            <div className="section-header">Bases and Flavorings</div>
+            <div className="kiosk-section-header">Bases and Flavorings</div>
             <div className="options-grid">
                 {bases.map(b => (
-                    <label key={b.inventoryId} className="option-item">
+                    <label 
+                        key={b.inventoryId} 
+                        className="option-item"
+                        onMouseEnter={() => speak(`${b.name} ${b.pricePerUnit ? `plus $${parseFloat(b.pricePerUnit).toFixed(2)}` : ''}`)}
+                    >
                         <input
                             type="checkbox"
                             checked={selectedBases.has(b.inventoryId)}
-                            onChange={() => toggleSet(selectedBases, setSelectedBases, b.inventoryId)}
+                            onChange={() => handleBaseToggle(b)}
                         />
                         {b.name} {b.pricePerUnit ? `(+$${parseFloat(b.pricePerUnit).toFixed(2)})` : ''}
                     </label>
                 ))}
             </div>
 
-            <div className="section-header">Toppings (select up to 5)</div>
+            <div className="kiosk-section-header">Toppings (select up to 5)</div>
             <div className="options-grid">
                 {toppings.map(t => (
-                    <label key={t.inventoryId} className="option-item">
+                    <label 
+                        key={t.inventoryId} 
+                        className="option-item"
+                        onMouseEnter={() => speak(`${t.name} ${t.pricePerUnit ? `plus $${parseFloat(t.pricePerUnit).toFixed(2)}` : ''}`)}
+                    >
                         <input
                             type="checkbox"
                             checked={selectedToppings.has(t.inventoryId)}
-                            onChange={() => toggleSet(selectedToppings, setSelectedToppings, t.inventoryId)}
+                            onChange={() => handleToppingToggle(t)}
                         />
                         {t.name} {t.pricePerUnit ? `(+$${parseFloat(t.pricePerUnit).toFixed(2)})` : ''}
                     </label>
                 ))}
             </div>
 
-            <div className="section-header">Size</div>
+            <div className="kiosk-section-header">Size</div>
             <div className="options-grid">
-                <label className="option-item"><input type="radio" checked={size === 'Normal'} onChange={() => setSize('Normal')} /> Regular</label>
-                <label className="option-item"><input type="radio" checked={size === 'Large'} onChange={() => setSize('Large')} /> Large (+$2.00)</label>
+                <label className="option-item" onMouseEnter={() => speak('Regular size')}>
+                    <input type="radio" checked={size === 'Normal'} onChange={() => handleSizeChange('Normal')} /> Regular
+                </label>
+                <label className="option-item" onMouseEnter={() => speak('Large size, plus $2.00')}>
+                    <input type="radio" checked={size === 'Large'} onChange={() => handleSizeChange('Large')} /> Large (+$2.00)
+                </label>
             </div>
 
-            <div className="section-header">Ice Level</div>
+            <div className="kiosk-section-header">Ice Level</div>
             <div className="options-grid">
-                <label className="option-item"><input type="radio" checked={iceLevel === 'NONE'} onChange={() => setIceLevel('NONE')} /> None</label>
-                <label className="option-item"><input type="radio" checked={iceLevel === 'LESS'} onChange={() => setIceLevel('LESS')} /> Less</label>
-                <label className="option-item"><input type="radio" checked={iceLevel === 'REGULAR'} onChange={() => setIceLevel('REGULAR')} /> Regular</label>
+                <label className="option-item" onMouseEnter={() => speak('Ice level: none')}>
+                    <input type="radio" checked={iceLevel === 'NONE'} onChange={() => handleIceChange('NONE')} /> None
+                </label>
+                <label className="option-item" onMouseEnter={() => speak('Ice level: less')}>
+                    <input type="radio" checked={iceLevel === 'LESS'} onChange={() => handleIceChange('LESS')} /> Less
+                </label>
+                <label className="option-item" onMouseEnter={() => speak('Ice level: regular')}>
+                    <input type="radio" checked={iceLevel === 'REGULAR'} onChange={() => handleIceChange('REGULAR')} /> Regular
+                </label>
             </div>
 
-            <div className="section-header">Temperature</div>
+            <div className="kiosk-section-header">Temperature</div>
             <div className="options-grid">
-                <label className="option-item"><input type="radio" checked={temperature === 'COLD'} onChange={() => setTemperature('COLD')} /> Cold</label>
-                <label className="option-item"><input type="radio" checked={temperature === 'HOT'} onChange={() => setTemperature('HOT')} /> Hot</label>
+                <label className="option-item" onMouseEnter={() => speak('Temperature: cold')}>
+                    <input type="radio" checked={temperature === 'COLD'} onChange={() => handleTemperatureChange('COLD')} /> Cold
+                </label>
+                <label className="option-item" onMouseEnter={() => speak('Temperature: hot')}>
+                    <input type="radio" checked={temperature === 'HOT'} onChange={() => handleTemperatureChange('HOT')} /> Hot
+                </label>
             </div>
 
-            <div className="section-header">Sugar Level</div>
+            <div className="kiosk-section-header">Sugar Level</div>
             <div className="options-grid">
                 {[0, 25, 50, 75, 100].map(s => (
-                    <label key={s} className="option-item">
-                        <input type="radio" checked={sugarAmount === s} onChange={() => setSugarAmount(s)} />
+                    <label 
+                        key={s} 
+                        className="option-item"
+                        onMouseEnter={() => speak(`Sugar level: ${s} percent`)}
+                    >
+                        <input type="radio" checked={sugarAmount === s} onChange={() => handleSugarChange(s)} />
                         {s}%
                     </label>
                 ))}
             </div>
 
             <div className="action-footer">
-                <button className="btn-back" onClick={() => setView('home')}>← Back</button>
-                <button className="btn-add" onClick={handleAdd}>Add to Cart</button>
+                <button 
+                    className="btn-back" 
+                    onMouseEnter={() => speak('Going back to home')}
+                    onClick={handleBack}
+                >
+                    ← Back
+                </button>
+                <button 
+                    className="btn-add" 
+                    onMouseEnter={() => speak('Add to Cart')}
+                    onClick={handleAdd}
+                >
+                    Add to Cart
+                </button>
             </div>
 
         </div>

@@ -1,0 +1,63 @@
+/* ToggleKioskMenuAlt.css - Warm Dark Theme */
+/* Used by both CustomItemPage and ToggleKioskMenu */
+
+.kiosk-toggle-container.alt-theme {
+    background: radial-gradient(ellipse at top left, #2a1a08 0%, #1c1008 50%, #0e0804 100%);
+    background-attachment: fixed;
+    color: #f5e6c8;
+}
+
+.alt-theme .kiosk-toggle-header {
+    border-bottom: 3px solid #c9923a;
+}
+
+.alt-theme .kiosk-toggle-header h1 {
+    color: #f5e6c8;
+}
+
+.alt-theme .section-header {
+    color: #1c1008;
+    background-color: #c9923a;
+    border-bottom: 2px solid #c9923a;
+}
+
+.alt-theme .kiosk-section-header {
+    color: #1c1008;
+    background-color: #c9923a;
+    border-bottom: 2px solid #c9923a;
+}
+
+.alt-theme .options-grid .option-item {
+    color: #f5e6c8;
+    border-bottom: 1.5px solid #3d2b10;
+}
+
+.alt-theme .options-grid .option-item input {
+    accent-color: #c9923a;
+}
+
+.alt-theme .customer-input-section {
+    color: #f5e6c8;
+    border-color: #3d2b10;
+}
+
+.alt-theme .btn-back {
+    color: #c9923a;
+    border-color: #c9923a;
+    background-color: transparent;
+}
+
+.alt-theme .btn-back:hover {
+    background-color: #c9923a;
+    color: #1c1008;
+}
+
+.alt-theme .btn-add {
+    background-color: #c9923a;
+    color: #1c1008;
+    box-shadow: 0 4px 6px rgba(201, 146, 58, 0.3);
+}
+
+.alt-theme .btn-add:hover {
+    background-color: #e0a84a;
+}

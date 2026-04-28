@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import './Employee.css'
+import ProfileIcon from './ProfileIcon'; 
 
-function Employee({ setView }) {
+function Employee({ setView, profile }) {
     const [employees, setEmployees] = useState([]);
+   
 
     function loadEmployees() {
         fetch('/api/employees')
@@ -110,6 +112,7 @@ function Employee({ setView }) {
 
     return (
         <>
+            <ProfileIcon profile={profile} setView={setView} />
             <h1>Employees</h1>
             <table className='data-table'>
                 <thead>

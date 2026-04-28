@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './KioskMainPage.css';
+import './KioskMainPageAlt.css';
 import MenuPage from './MenuKioskPage';
 import CustomItemPage from './CustomItemPage';
+import { TouchInput } from './Touchkeyboard';
 
 function KioskMainPage({ setView }) {
     const [kioskView, setKioskView] = useState('home');
@@ -10,6 +12,10 @@ function KioskMainPage({ setView }) {
     const [customerName, setCustomerName] = useState('');
     const [weather, setWeather] = useState(null);
     const [menuItems, setMenuItems] = useState([]);
+    const [altTheme, setAltTheme] = useState(false);
+
+    // TTS State
+    const [ttsEnabled, setTtsEnabled] = useState(false);
 
     // Chatbot state
     const [chatOpen, setChatOpen] = useState(false);
@@ -18,6 +24,39 @@ function KioskMainPage({ setView }) {
     ]);
     const [chatInput, setChatInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
+
+    // Rewards/phone modal state (replaces prompt())
+    // Existing state
+    const [phoneNumber, setPhoneNumber] = useState('');
+
+    // NEW: Create a ref to act as our vault
+    const phoneRef = useRef('');
+
+    // NEW: Create a custom change handler that updates both
+    const handlePhoneChange = (val) => {
+        // Safely extract the value whether it's an event object or a raw string
+        const newValue = val?.target ? val.target.value : val;
+        
+        // Update the visual UI
+        setPhoneNumber(newValue);
+        
+        // Update the vault (happens instantly, no re-render waiting)
+        phoneRef.current = newValue; 
+    };
+        // Existing state
+    const [pointsInput, setPointsInput] = useState('');
+
+    // NEW: Ref to hold the absolute latest points value
+    const pointsRef = useRef('');
+
+    // NEW: Custom handler to update both state and the vault
+    const handlePointsChange = (val) => {
+        const newValue = val?.target ? val.target.value : val;
+        setPointsInput(newValue);
+        pointsRef.current = newValue;
+    };
+    const [rewardsStep, setRewardsStep] = useState(null); // null | 'phone' | 'points'
+    const [availablePoints, setAvailablePoints] = useState(0);
 
     useEffect(() => {
         fetch('https://api.open-meteo.com/v1/forecast?latitude=30.628&longitude=-96.3344&current=temperature_2m,weather_code&temperature_unit=fahrenheit')
@@ -42,13 +81,20 @@ function KioskMainPage({ setView }) {
         return 'Thunderstorm ⛈️';
     };
 
+    function speak(text, force = false) {
+        if (!ttsEnabled && !force) return;
+        window.speechSynthesis.cancel();
+        const clean = text.replace(/[\u{1F300}-\u{1FFFF}]/gu, '').trim();
+        const utterance = new SpeechSynthesisUtterance(clean);
+        window.speechSynthesis.speak(utterance);
+    }
+
     async function sendChatMessage() {
         if (!chatInput.trim() || chatLoading) return;
         const userMsg = chatInput.trim();
         setChatMessages(prev => [...prev, { role: 'user', text: userMsg }]);
         setChatInput('');
         setChatLoading(true);
-
         try {
             const menuContext = menuItems.map(i => `${i.name} ($${i.basePrice})`).join(', ');
             const res = await fetch('/api/chat', {
@@ -66,23 +112,141 @@ function KioskMainPage({ setView }) {
         }
     }
 
-    function addToCart(lineItem) {
-        setCart(prev => [...prev, lineItem]);
-        setCartTotal(prev => prev + lineItem.price);
-    }
-
     function clearCart() {
         setCart([]);
         setCartTotal(0);
         setCustomerName('');
+    }    
+
+    function addToCart(lineItem) {
+        setCart(prev => {
+            const existingIndex = prev.findIndex(li =>
+                li.drinkName === lineItem.drinkName &&
+                li.size === lineItem.size &&
+                li.baseType === lineItem.baseType &&
+                li.iceLevel === lineItem.iceLevel &&
+                li.temperature === lineItem.temperature &&
+                li.sugarAmount === lineItem.sugarAmount
+            );
+    
+            if (existingIndex !== -1) {
+                const updated = [...prev];
+                updated[existingIndex] = {
+                    ...updated[existingIndex],
+                    quantity: (updated[existingIndex].quantity || 1) + 1
+                };
+                return updated;
+            }
+    
+            return [...prev, { ...lineItem, quantity: 1 }];
+        });
+        setCartTotal(prev => prev + lineItem.price);
+        speak(`${lineItem.drinkName} added to cart`);
+    }
+    
+    function updateQuantity(index, delta) {
+        setCart(prev => {
+            const updated = [...prev];
+            const item = updated[index];
+            const newQty = (item.quantity || 1) + delta;
+    
+            if (newQty < 1) return prev;
+    
+            setCartTotal(tot => tot + (item.price * delta));
+            updated[index] = { ...item, quantity: newQty };
+            return updated;
+        });
+    }
+    
+    function removeFromCart(index) {
+        setCart(prev => {
+            const item = prev[index];
+            setCartTotal(tot => tot - item.price * (item.quantity || 1));
+            return prev.filter((_, i) => i !== index);
+        });
+        speak('Item removed from cart');
     }
 
     async function submitOrder() {
         if (cart.length === 0) {
             alert('Add at least one drink first.');
+            speak('Add at least one drink first.');
             return;
         }
+        setPhoneNumber('');
+        setPointsInput('');
+        setRewardsStep('phone');
+    }
+
+    async function handlePhoneDone() {
+        // READ FROM THE REF, NOT THE STATE!
+        const currentPhone = phoneRef.current;
+        
+        const finalPhone = currentPhone.replace(/\D/g, '');
+        console.log("Phone number entered:", finalPhone);
+
+        // Update state to match the cleaned version
+        setPhoneNumber(finalPhone);
+        phoneRef.current = finalPhone;
+
+        if (!finalPhone.trim()) {
+            setRewardsStep(null);
+            await finalizeOrder(null, 0);
+            return;
+        }
+
         try {
+            const res = await fetch('/api/rewards/getPoints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber: finalPhone })
+            });
+            const data = await res.json();
+            const pts = Number(data.points) || 0;
+            if (pts > 0) {
+                setAvailablePoints(pts);
+                setPointsInput('');
+                setRewardsStep('points');
+            } else {
+                setRewardsStep(null);
+                await finalizeOrder(finalPhone, 0);
+            }
+        } catch {
+            setRewardsStep(null);
+            await finalizeOrder(finalPhone, 0);
+        }
+    }
+
+    async function handlePointsDone() {
+        // READ FROM THE REF, NOT THE STATE
+        const currentPointsString = pointsRef.current;
+        
+        // Calculate the safe points value
+        const pts = Math.max(0, Math.min(Number(currentPointsString) || 0, availablePoints));
+        
+        setRewardsStep(null);
+        await finalizeOrder(phoneNumber, pts); 
+    }
+
+    async function finalizeOrder(phone, pointsToSpend) {
+        try {
+            let addedPoints = Math.floor(cartTotal / 5);
+            console.log("Points to add:", addedPoints, "Points to spend:", pointsToSpend);
+            if (phone && pointsToSpend > 0) {
+                addedPoints -= pointsToSpend;
+                await fetch('/api/rewards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phoneNumber: phone, pointsToAdd: addedPoints })
+                });
+            } else if (phone) {
+                await fetch('/api/rewards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phoneNumber: phone, pointsToAdd: addedPoints })
+                });
+            }
+
             const res = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -92,24 +256,26 @@ function KioskMainPage({ setView }) {
                     lineItems: cart
                 })
             });
+            const finalTotal = cartTotal - pointsToSpend * 0.20;
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Order failed');
-            alert(`Order #${data.orderId} submitted!\nTotal: $${cartTotal.toFixed(2)}`);
+            alert(`Order #${data.orderId} submitted!\nTotal: $${finalTotal.toFixed(2)}`);
+            speak(`Order #${data.orderId} submitted! Total: $${finalTotal.toFixed(2)}`);
             clearCart();
         } catch (err) {
             alert('Order failed: ' + err.message);
+            speak('Order failed: ' + err.message);
         }
     }
 
     if (kioskView === 'menu')
-        return <MenuPage setView={setKioskView} addToCart={addToCart} />;
-
+        return <MenuPage setView={setKioskView} addToCart={addToCart} ttsEnabled={ttsEnabled} speak={speak} altTheme={altTheme} />;  
+    
     if (kioskView === 'custom')
-        return <CustomItemPage setView={setKioskView} onAdd={addToCart} />;
+        return <CustomItemPage setView={setKioskView} onAdd={addToCart} altTheme={altTheme} speak={speak} />;  
 
     return (
-        <div className="kiosk-main">
-
+        <div className={altTheme ? "kiosk-main alt-theme" : "kiosk-main"}>  
             <div className="title-section">
                 <h1>Kiosk</h1>
                 {weather && (
@@ -119,167 +285,258 @@ function KioskMainPage({ setView }) {
                 )}
             </div>
 
-            <div className="menu-section" onClick={() => setKioskView('menu')}>
-                <h2>Menu</h2>
+            <div 
+                className="menu-section" 
+                onMouseEnter={() => speak('Order from menu')}
+                onClick={() => setKioskView('menu')}
+            >
+                <h2>Order From Menu</h2>
             </div>
 
-            <div className="custom-item-section" onClick={() => setKioskView('custom')}>
-                <h2>Custom Item</h2>
+            <div 
+                className="custom-item-section" 
+                onMouseEnter={() => speak('Order custom item')}
+                onClick={() => setKioskView('custom')}
+            >
+                <h2>Order Custom Item</h2>
             </div>
 
             <div className="cart-section">
                 <h2>Cart</h2>
-
-                <div style={{ marginBottom: '12px' }}>
+                <div 
+                    style={{ marginBottom: '12px' }}
+                    onMouseEnter={() => speak('Enter your name')}
+                >
                     <label style={{ fontWeight: 600, marginRight: '8px' }}>Name:</label>
-                    <input
-                        type="text"
+                    <TouchInput
                         value={customerName}
-                        onChange={e => setCustomerName(e.target.value)}
+                        onChange={setCustomerName}
                         placeholder="Enter your name"
+                        label="Your Name"
                         style={{
                             padding: '6px 10px',
                             borderRadius: '4px',
                             border: '1px solid #c9d6e8',
                             fontSize: '14px',
                             width: '100%',
-                            marginTop: '4px'
+                            marginTop: '4px',
                         }}
                     />
                 </div>
-
                 {cart.length === 0 && <p>Cart is empty</p>}
                 {cart.map((li, i) => (
                     <div key={i} className="cart-item">
-                        <strong>{li.drinkName}</strong> ({li.size}) — ${li.price.toFixed(2)}
+                        <div className="cart-item-top">
+                            <strong>{li.drinkName}</strong> ({li.size}) — ${(li.price * (li.quantity || 1)).toFixed(2)}
+                            <button
+                                className="cart-item-remove"
+                                onClick={() => removeFromCart(i)}
+                                onMouseEnter={() => speak('Remove item')}
+                                aria-label="Remove item"
+                            >
+                                ✕
+                            </button>
+                        </div>
                         <div className="cart-item-details">
                             {li.baseType} · {li.temperature} · Ice: {li.iceLevel} · Sugar: {li.sugarAmount}%
                         </div>
+                        <div className="cart-item-qty">
+                            <button
+                                className="qty-btn"
+                                onClick={() => updateQuantity(i, -1)}
+                                onMouseEnter={() => speak('Decrease quantity')}
+                                disabled={li.quantity <= 1}
+                            >
+                                −
+                            </button>
+                            <span className="qty-value">{li.quantity || 1}</span>
+                            <button
+                                className="qty-btn"
+                                onClick={() => updateQuantity(i, 1)}
+                                onMouseEnter={() => speak('Increase quantity')}
+                            >
+                                +
+                            </button>
+                        </div>
                     </div>
                 ))}
-                <div className="cart-total">Total: ${cartTotal.toFixed(2)}</div>
-                <button className="submit-button" onClick={submitOrder}>Submit Order</button>
+                <button
+                    className="submit-button"
+                    onClick={submitOrder}
+                    onMouseEnter={() => speak(`Submit order. Total: $${cartTotal.toFixed(2)}`)}
+                >
+                    Submit Order
+                </button>
             </div>
 
-            {/* Chatbot Toggle Button */}
+            {/* TTS Button */}
             <button
-                onClick={() => setChatOpen(!chatOpen)}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    background: '#e53935',
-                    color: '#fff',
-                    fontSize: '24px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                    zIndex: 1000
+                className={`tts-button ${ttsEnabled ? 'tts-on' : ''}`}
+                onClick={() => {
+                    const willBeEnabled = !ttsEnabled;
+                    setTtsEnabled(willBeEnabled);
+                    if (willBeEnabled) {
+                        setTimeout(() => speak('Text to speech enabled', true), 300);
+                    }
                 }}
+                aria-label={ttsEnabled ? 'Text to speech on' : 'Text to speech off'}
+                aria-pressed={ttsEnabled}
             >
+                🔊
+            </button>
+
+            {/* Theme Toggle Button */}
+            <button
+                className="theme-toggle-btn"
+                onClick={() => setAltTheme(!altTheme)}
+                aria-label="Toggle theme"
+            >
+                {altTheme ? '☀️' : '🌙'}
+            </button>
+
+            {/* Chatbot Toggle Button */}
+            <button className="chat-toggle-button" onClick={() => setChatOpen(!chatOpen)} aria-label="Open chat assistant" aria-expanded={chatOpen}>
                 AI
             </button>
 
             {/* Chatbot Panel */}
             {chatOpen && (
-                <div style={{
-                    position: 'fixed',
-                    bottom: '90px',
-                    right: '20px',
-                    width: '340px',
-                    height: '450px',
-                    background: '#fff',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        padding: '12px 16px',
-                        background: '#e53935',
-                        color: '#fff',
-                        borderRadius: '12px 12px 0 0',
-                        fontWeight: 600,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
+                <div className="chat-panel" role="dialog" aria-label="Boba Assistant chat">
+                    <div className="chat-header">
                         <span>Boba Assistant</span>
-                        <button
-                            onClick={() => setChatOpen(false)}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#fff',
-                                fontSize: '20px',
-                                cursor: 'pointer',
-                                padding: '0 4px'
-                            }}
-                        >
-                            ×
-                        </button>
+                        <button className="chat-close-button" onClick={() => setChatOpen(false)} aria-label="Close chat">×</button>
                     </div>
-                    <div style={{
-                        flex: 1,
-                        padding: '12px',
-                        overflowY: 'auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px'
-                    }}>
+                    <div className="chat-messages" aria-live="polite" aria-label="Chat messages">
                         {chatMessages.map((msg, i) => (
-                            <div key={i} style={{
-                                alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                                background: msg.role === 'user' ? '#e53935' : '#f1f1f1',
-                                color: msg.role === 'user' ? '#fff' : '#000',
-                                padding: '8px 12px',
-                                borderRadius: '12px',
-                                maxWidth: '80%',
-                                fontSize: '14px'
-                            }}>
+                            <div key={i} className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}>
                                 {msg.text}
                             </div>
                         ))}
-                        {chatLoading && <div style={{ color: '#888', fontSize: '13px' }}>Thinking...</div>}
+                        {chatLoading && <div className="chat-thinking">Thinking...</div>}
                     </div>
-                    <div style={{ padding: '12px', borderTop: '1px solid #eee', display: 'flex', gap: '6px' }}>
-                        <input
-                            type="text"
+                    <div className="chat-input-row">
+                        <TouchInput
                             value={chatInput}
-                            onChange={e => setChatInput(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') sendChatMessage(); }}
+                            onChange={setChatInput}
                             placeholder="Ask me anything..."
-                            style={{
-                                flex: 1,
-                                padding: '8px 12px',
-                                border: '1px solid #ccc',
-                                borderRadius: '6px',
-                                fontSize: '14px'
-                            }}
+                            label="Chat"
+                            onEnter={sendChatMessage}
+                            className="chat-input"
+                            aria-label="Chat message input"
                         />
-                        <button
-                            onClick={sendChatMessage}
-                            disabled={chatLoading}
-                            style={{
-                                background: '#e53935',
-                                color: '#fff',
-                                border: 'none',
-                                padding: '8px 16px',
-                                borderRadius: '6px',
-                                cursor: 'pointer'
-                            }}
-                        >
+                        <button className="chat-send-button" onClick={sendChatMessage} disabled={chatLoading}>
                             Send
                         </button>
                     </div>
                 </div>
             )}
+
+            {/* ── Rewards: phone number modal ── */}
+            {rewardsStep === 'phone' && (
+                <RewardsModal title="Rewards Program" subtitle="Enter your phone number to earn & redeem points, or skip to continue.">
+                    <TouchInput
+                        value={phoneNumber}
+                        onChange={handlePhoneChange} // <-- Use the new handler here
+                        placeholder="e.g. 5551234567"
+                        label="Phone Number"
+                        numeric 
+                        onEnter={handlePhoneDone}
+                        style={modalInputStyle}
+                    />
+                    <div style={{ display:'flex', gap:12, marginTop:16 }}>
+                        <button style={modalBtnSecondary} onClick={() => { setRewardsStep(null); finalizeOrder(null, 0); }}>Skip</button>
+                        {/* The Continue button works off the state, so we don't need to pass 'val' here */}
+                        <button style={modalBtnPrimary} onClick={() => handlePhoneDone()}>Continue</button>
+                    </div>
+                </RewardsModal>
+            )}
+
+            {/* ── Rewards: points modal ── */}
+            {rewardsStep === 'points' && (
+                <RewardsModal title="Redeem Points" subtitle={`You have ${availablePoints} points. Each point is worth $0.20. Enter how many to spend (or 0 to skip).`}>
+                    <TouchInput
+                        value={pointsInput}
+                        onChange={handlePointsChange} // <-- Use the new handler
+                        placeholder="0"
+                        label="Points to spend"
+                        numeric 
+                        onEnter={handlePointsDone}
+                        style={modalInputStyle}
+                    />
+                    <p style={{ fontSize:13, color:'#6b7a99', margin:'6px 0 0' }}>
+                        {/* The visual discount calculation can still safely rely on the React state */}
+                        Discount: ${(Math.min(Number(pointsInput)||0, availablePoints) * 0.20).toFixed(2)}
+                    </p>
+                    <div style={{ display:'flex', gap:12, marginTop:16 }}>
+                        <button style={modalBtnSecondary} onClick={() => {
+                            pointsRef.current = '0'; // Force ref to 0 for skip
+                            handlePointsDone();
+                        }}>Use 0 Points</button>
+                        <button style={modalBtnPrimary} onClick={handlePointsDone}>Confirm</button>
+                    </div>
+                </RewardsModal>
+            )}
         </div>
     );
 }
+
+// ─── Rewards modal shell ──────────────────────────────────────────────────────
+function RewardsModal({ title, subtitle, children }) {
+    return (
+        <>
+            <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.45)', zIndex:99997 }} />
+            <div style={{
+                position:  'fixed',
+                top:       '50%',
+                left:      '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex:    99998,
+                background:'#fff',
+                borderRadius: 16,
+                padding:   '28px 32px',
+                minWidth:  320,
+                maxWidth:  420,
+                boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
+                width:     '90vw',
+            }}>
+                <h3 style={{ margin:'0 0 6px', fontSize:20, color:'#1a1a2e' }}>{title}</h3>
+                <p style={{ margin:'0 0 16px', fontSize:14, color:'#6b7a99' }}>{subtitle}</p>
+                {children}
+            </div>
+        </>
+    );
+}
+
+const modalInputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    fontSize: 16,
+    borderRadius: 8,
+    border: '1.5px solid #a0aabd',
+    boxSizing: 'border-box',
+};
+
+const modalBtnPrimary = {
+    flex: 1,
+    padding: '10px 0',
+    borderRadius: 8,
+    border: 'none',
+    background: '#4CAF50',
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: 'pointer',
+};
+
+const modalBtnSecondary = {
+    flex: 1,
+    padding: '10px 0',
+    borderRadius: 8,
+    border: '1.5px solid #a0aabd',
+    background: '#fff',
+    color: '#4a5568',
+    fontSize: 15,
+    cursor: 'pointer',
+};
 
 export default KioskMainPage;

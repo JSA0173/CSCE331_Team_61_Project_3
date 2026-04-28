@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
 import './MenuKioskPage.css';
+import './MenuKioskPageAlt.css';       // 👈 add import
 import ToggleKioskMenu from './ToggleKioskMenu';
 
-function MenuKioskPage({ setView, addToCart }) {
+function MenuKioskPage({ setView, addToCart, speak, ttsEnabled, altTheme }) {  // 👈 receive altTheme
     const [menuItems, setMenuItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
 
     useEffect(() => {
         fetch('/api/items/menu')
             .then(res => res.json())
-            .then(data => setMenuItems(data))
+            .then(data => {
+                setMenuItems(data);
+                speak(`Menu loaded. ${data.length} items available. Select a drink to customize it.`);
+            })
             .catch(err => console.error('Failed to load menu:', err));
     }, []);
 
     function handleAdd(lineItem) {
         addToCart(lineItem);
+        speak(`${lineItem.drinkName} added to cart. Total: $${lineItem.price.toFixed(2)}`);
         setView('home');
         setSelectedItem(null);
     }
@@ -24,16 +29,31 @@ function MenuKioskPage({ setView, addToCart }) {
             <ToggleKioskMenu
                 item={selectedItem}
                 onAdd={handleAdd}
-                onBack={() => setSelectedItem(null)}
+                onBack={() => {
+                    speak('Going back to menu');
+                    setSelectedItem(null);
+                }}
+                speak={speak}
+                ttsEnabled={ttsEnabled}
+                altTheme={altTheme}   // 👈 pass down
             />
         );
     }
 
     return (
-        <div className="kiosk-toggle-container">
+        <div className={altTheme ? "kiosk-toggle-container alt-theme" : "kiosk-toggle-container"}>  {/* 👈 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
-                <button className="btn-back" onClick={() => setView('home')}>← Back</button>
-                <h1 style={{ color: '#002147', fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' }}>Menu</h1>
+                <button 
+                    className="btn-back" 
+                    onMouseEnter={() => speak('Going back to home')}
+                    onClick={() => setView('home')}
+                >
+                    ← Back
+                </button>
+                <h1 style={{ 
+                    color: altTheme ? '#f5e6c8' : '#002147',   // 👈 dynamic color
+                    fontSize: '40px', fontWeight: 300, letterSpacing: '4px', textTransform: 'uppercase' 
+                }}>Menu</h1>
             </div>
 
             <div className="menu-grid">
@@ -41,7 +61,8 @@ function MenuKioskPage({ setView, addToCart }) {
                     <button
                         key={item.itemId}
                         className="option-item"
-                        style={{ cursor: 'pointer', background: 'none', border: 'none', justifyContent: 'space-between' }}
+                        style={{ cursor: 'pointer', background: 'none', border: 'none', justifyContent: 'space-between', display: 'flex', width: '100%' }}
+                        onMouseEnter={() => speak(`${item.name}, $${parseFloat(item.basePrice).toFixed(2)}`)}
                         onClick={() => setSelectedItem(item)}
                     >
                         <span>{item.name}</span>
