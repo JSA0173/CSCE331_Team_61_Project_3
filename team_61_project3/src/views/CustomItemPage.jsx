@@ -101,9 +101,11 @@ function CustomItemPage({ onAdd, setView, speak = () => {}, altTheme }) {
     return (
         <div className={altTheme ? "kiosk-toggle-container alt-theme" : "kiosk-toggle-container"} style={{ position: 'relative' }}>
 
-            <div style={{ position: 'absolute', top: '30px', right: '40px', color: '#002147', textAlign: 'right' }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Price</div>
-                <strong style={{ fontSize: '2rem' }}>${calculatePrice().toFixed(2)}</strong>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                <div style={{ color: '#002147', textAlign: 'right' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1px' }}>Current Price</div>
+                    <strong style={{ fontSize: '2rem' }}>${calculatePrice().toFixed(2)}</strong>
+                </div>
             </div>
 
             <div className="kiosk-section-header">Bases and Flavorings</div>
